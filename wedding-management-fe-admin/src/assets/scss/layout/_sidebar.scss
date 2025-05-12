@@ -1,0 +1,28 @@
+.p-3 {
+    margin-left: 31px;
+
+    flex-shrink: 0;
+    width: 260px;
+    background-color:white;
+
+    .sidenav-bg:hover {
+        background-color: #f8f9fa;
+        border-radius:  0.3rem  ;
+    }
+}
+
+
+/*@include media-breakpoint-down(lg) {
+  .sidebarArea {
+    position: fixed;
+    height: 100%;
+    overflow: auto;
+    z-index: 1;
+    margin-left: -260px;
+    transition: 0.2s ease-in;
+    &.showSidebar {
+      margin-left: 0px;
+    }
+  }
+}
+  */
