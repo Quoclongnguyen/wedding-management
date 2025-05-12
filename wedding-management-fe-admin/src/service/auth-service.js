@@ -29,7 +29,8 @@ const checkRoleUser = () => {
             return false;
         }
 
-        const decodedToken = jwt(token);
+         const decodedToken = jwtDecode(token);
+
 
         // Kiểm tra token hết hạn
         const currentTime = Date.now() / 1000;
@@ -76,7 +77,7 @@ const getCurrentUser = () => {
         }
 
         return decodedToken;
-    } catch (error) {
+    } catch (error) {+
         console.error("Lỗi khi lấy thông tin người dùng:", error);
         return null;
     }

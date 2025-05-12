@@ -1,32 +1,49 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import Starter from '@/view/Starter.vue'
-import FullLayout from '@/layout/FullLayout.vue'
-import AccountManage from '@/components/dashboard/AccountManage.vue'; // Import AccountManage
-
+import { createRouter, createWebHistory } from 'vue-router';
+import Starter from '@/view/Starter.vue';
+import FullLayout from '@/layout/FullLayout.vue';
+import AccountManage from '@/components/dashboard/AccountManage.vue';
+import Login from '@/view/ui/Login.vue';
+import AuthService from '@/service/auth-service'; // Phải có checkRoleUser()
 
 const routes = [
   {
+    path: '/login',
+    name: 'Login',
+    component: Login,
+  },
+  {
     path: '/',
-    component: FullLayout, // Sử dụng FullLayout làm layout chính
+    component: FullLayout,
+    meta: { requiresAuth: true }, // áp dụng cho cả FullLayout và children
     children: [
+      { path: '', name: 'Starter', component: Starter },
       {
-        path: '', // Route mặc định
-        name: 'Starter',
-        component: Starter, // Trang Starter
-      },
-      // Bạn có thể thêm các route con khác tại đây
-       {
-        path: 'accounts', // Route cho quản lý tài khoản
+        path: 'accounts',
         name: 'AccountManage',
-        component: AccountManage, // Trang AccountManage
+        component: AccountManage,
       },
-    ]
-  }
-]
+    ],
+  },
+];
 
 const router = createRouter({
-    history: createWebHistory(),
-    routes,
-})
+  history: createWebHistory(),
+  routes,
+});
 
-export default router   
+router.beforeEach((to, from, next) => {
+  const token = localStorage.getItem('token');
+  const hasPermission = AuthService.checkRoleUser(); // phải là true nếu có quyền
+
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+    if (token && hasPermission) {
+      next(); // Cho phép truy cập
+    } else {
+      next({ path: '/login' }); //Không hợp lệ → chuyển hướng
+    }
+  } else {
+    next(); //  Không yêu cầu xác thực
+  }
+});
+
+export default router;
