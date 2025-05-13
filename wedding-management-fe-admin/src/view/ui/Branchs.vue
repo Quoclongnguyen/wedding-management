@@ -171,7 +171,8 @@ onMounted(fetchBranches);
 </script>
 
 <template>
-    <div>
+    <div class="container">
+        <h5 class="card-title">Quản lý Chi Nhánh</h5>
         <div class="Timkiem">
             <input class="form-control col-3"  placeholder="Tìm kiếm theo tên hoặc địa chỉ" v-model="searchTerm"
                 @input="handleSearch"/>
@@ -371,18 +372,36 @@ onMounted(fetchBranches);
 
 <style scoped>
 /* Add your styles here */
+.container {
+   max-width: 80%;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+}
+
 .Timkiem {
-    display: flexbox;
-    border-radius: 10px;
+    margin-top: 10px;
+    background: #dbdee0;
+    border-radius: 8px;
+    display: block;
     width: 80%;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    border: #dbdee0 1px solid;
 }
 .Timkiem .btnThemChinhanh {
 
-    display: flexbox;
+   margin-top: 10px;
+    background-color: #007bff;
     color: white;
-    
-    background: #2962ff;
-    width: 20%;
-    border-radius: 8px;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
 }
 </style>
