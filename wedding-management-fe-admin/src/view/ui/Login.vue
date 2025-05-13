@@ -1,5 +1,83 @@
-<!-- filepath: src\view\ui\Login.vue -->
- <style src="./login.css"></style>
+<script setup>
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import axios from "axios";
+import authService from "@/service/auth-service";
+
+// Các biến trạng thái
+const username = ref("");
+const password = ref("");
+const error = ref(""); // Biến để lưu thông báo lỗi
+const loading = ref(false);
+const router = useRouter();
+
+// Hàm kiểm tra tính hợp lệ của form
+const validate = () => {
+  if (!username.value.trim()) {
+    error.value = "Vui lòng nhập email!";
+    return false;
+  }
+  if (!password.value) {
+    error.value = "Vui lòng nhập mật khẩu!";
+    return false;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(username.value)) {
+    error.value = "Email không hợp lệ!";
+    return false;
+  }
+  return true;
+};
+
+// Hàm xử lý đăng nhập
+const handleLogin = async () => {
+  if (!validate()) return;
+
+  loading.value = true;
+  error.value = ""; // Xóa thông báo lỗi trước đó
+
+  try {
+    const payload = {
+      email: username.value,
+      password: password.value,
+    };
+
+    console.log("Payload gửi:", payload);
+
+    const response = await axios.post(
+      "https://localhost:7296/api/account/SignInAdmin",
+      payload,
+      {
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+
+    if (response.status === 200 && response.data.token) {
+      const { token, roles } = response.data;
+      localStorage.setItem("token", token);
+      localStorage.setItem("roles", JSON.stringify(roles));
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+      if (authService.checkRoleUser()) {
+        router.push("/"); // Chuyển hướng đến trang chính
+      } else {
+        error.value = "Tài khoản không có quyền truy cập!";
+        localStorage.removeItem("token");
+        localStorage.removeItem("roles");
+      }
+    }
+  } catch (err) {
+    console.error("Lỗi khi gọi API:", err.response?.data || err);
+    if (err.response) {
+      error.value = err.response.data.message || "Đăng nhập thất bại!";
+    } else {
+      error.value = "Lỗi kết nối server!";
+    }
+  } finally {
+    loading.value = false;
+  }
+};
+</script>
+
 <template>
   <div class="login-page">
     <div class="login-container">
@@ -54,87 +132,6 @@
     </div>
   </div>
 </template>
-
-<script setup>
-import { ref } from "vue";
-import { useRouter } from "vue-router";
-import axios from "axios";
-import authService from "@/service/auth-service";
-
-// Các biến trạng thái
-const username = ref("");
-const password = ref("");
-const error = ref("");
-const loading = ref(false);
-const router = useRouter();
-
-// Hàm kiểm tra tính hợp lệ của form
-const validate = () => {
-  if (!username.value.trim()) {
-    error.value = "Vui lòng nhập email!";
-    return false;
-  }
-  if (!password.value) {
-    error.value = "Vui lòng nhập mật khẩu!";
-    return false;
-  }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(username.value)) {
-    error.value = "Email không hợp lệ!";
-    return false;
-  }
-  return true;
-};
-
-// Hàm xử lý đăng nhập
-const handleLogin = async () => {
-  if (!validate()) return;
-
-  loading.value = true;
-  error.value = "";
-
-  try {
-    const payload = {
-      email: username.value,
-      password: password.value,
-    };
-
-    console.log("🔐 Payload gửi:", payload);
-
-    const response = await axios.post(
-      "https://localhost:7296/api/account/SignInAdmin",
-      payload,
-      {
-        headers: { "Content-Type": "application/json" },
-      }
-    );
-
-    if (response.status === 200 && response.data.token) {
-      const { token, roles } = response.data;
-      localStorage.setItem("token", token);
-      localStorage.setItem("roles", JSON.stringify(roles));
-      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-
-      if (authService.checkRoleUser()) {
-        router.push("/");
-      } else {
-        error.value = "Tài khoản không có quyền truy cập!";
-        localStorage.removeItem("token");
-        localStorage.removeItem("roles");
-      }
-    }
-  } catch (err) {
-    console.error("❌ Lỗi khi gọi API:", err.response?.data || err);
-    if (err.response) {
-      error.value = err.response.data.message || "Đăng nhập thất bại!";
-    } else {
-      error.value = "Lỗi kết nối server!";
-    }
-  } finally {
-    loading.value = false;
-  }
-};
-
-</script>
 
 <style scoped>
 /* Thêm các style tùy chỉnh nếu cần */

@@ -4,6 +4,7 @@ import FullLayout from '@/layout/FullLayout.vue';
 import AccountManage from '@/components/dashboard/AccountManage.vue';
 import Login from '@/view/ui/Login.vue';
 import AuthService from '@/service/auth-service'; // Phải có checkRoleUser()
+import Branchs from '@/view/ui/Branchs.vue';
 
 const routes = [
   {
@@ -22,6 +23,12 @@ const routes = [
         name: 'AccountManage',
         component: AccountManage,
       },
+       {
+        path: 'branches',
+        name: 'Branches',
+        component: Branchs,
+      },
+
     ],
   },
 ];
@@ -33,16 +40,17 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token');
-  const hasPermission = AuthService.checkRoleUser(); // phải là true nếu có quyền
+  const hasPermission = AuthService.checkRoleUser();
 
   if (to.matched.some(record => record.meta.requiresAuth)) {
     if (token && hasPermission) {
       next(); // Cho phép truy cập
     } else {
-      next({ path: '/login' }); //Không hợp lệ → chuyển hướng
+      console.warn("Người dùng không có quyền hoặc chưa đăng nhập.");
+      next({ path: '/login' }); // Chuyển hướng đến trang login
     }
   } else {
-    next(); //  Không yêu cầu xác thực
+    next(); // Không yêu cầu xác thực
   }
 });
 

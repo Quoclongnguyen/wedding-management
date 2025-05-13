@@ -2,6 +2,7 @@ import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 
 // Hàm logout
+/*
 const logout = () => {
     try {
         // Xóa token và roles khỏi localStorage
@@ -17,7 +18,23 @@ const logout = () => {
         console.error("Lỗi khi logout:", error);
     }
 };
+*/
 
+const logout = (router) => {
+    try {
+        // Xóa token và roles khỏi localStorage
+        localStorage.removeItem("token");
+        localStorage.removeItem("roles");
+
+        // Xóa header Authorization
+        delete axios.defaults.headers.common["Authorization"];
+
+        // Chuyển hướng về trang login bằng Vue Router
+        router.push('/login');
+    } catch (error) {
+        console.error("Lỗi khi logout:", error);
+    }
+};
 // Hàm kiểm tra quyền của người dùng
 const checkRoleUser = () => {
     try {
