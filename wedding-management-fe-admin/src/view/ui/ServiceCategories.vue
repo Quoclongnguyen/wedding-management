@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import { menuCategoryApi } from "@/api/menuCategory"; 
+import { serviceCategoryApi } from "@/api/serviceCategory"; // API của bạn
 
 const categories = ref([]);
 const currentPage = ref(0);
@@ -32,7 +32,7 @@ onMounted(() => {
 const fetchCategories = async () => {
     try {
         loading.value = true;
-        const data = await menuCategoryApi.getAll();
+        const data = await serviceCategoryApi.getAll();
         categories.value = data;
     } catch (err) {
         console.error("Error fetching categories:", err);
@@ -78,7 +78,7 @@ const handleAddCategory = async () => {
 
     try {
         loading.value = true;
-        await menuCategoryApi.create(newCategory.value);
+        await serviceCategoryApi.create(newCategory.value);
         successMessage.value = "Thêm danh mục thành công!";
         successModal.value = true;
         addCategoryModal.value = false;
@@ -92,57 +92,47 @@ const handleAddCategory = async () => {
 };
 
 const handleEditCategory = async (categoryId) => {
-    if (!categoryId) {
-        console.error("categoryId không hợp lệ");
-        return;  // Prevents further action if categoryId is invalid
-    }
-
     try {
-        const category = await menuCategoryApi.getById(categoryId);
+        const category = await serviceCategoryApi.getById(categoryId);
         editCategory.value = {
             id: category.categoryId,
             name: category.name,
             description: category.description,
         };
         editCategoryModal.value = true;
-    } catch (error) {
-        console.error("Error fetching category:", error);
+    } catch (err) {
+        console.error("Error fetching category:", err);
     }
 };
 
-
-
 const handleUpdateCategory = async () => {
     if (!editCategory.value.id) {
-        console.error("categoryId không hợp lệ");
-        return; // Prevents further action if categoryId is invalid
+        error.value = ["Không tìm thấy danh mục để cập nhật"];
+        return;
     }
 
     try {
-        const dataToUpdate = {
+        loading.value = true;
+        await serviceCategoryApi.update(editCategory.value.id, {
+            categoryId: editCategory.value.id,
             name: editCategory.value.name,
             description: editCategory.value.description,
-            categoryId: editCategory.value.id, // Ensure categoryId is included
-        };
-        console.log("Updating category with data:", dataToUpdate);
-        await menuCategoryApi.update(editCategory.value.id, dataToUpdate);
+        });
         successMessage.value = "Cập nhật danh mục thành công!";
         successModal.value = true;
         editCategoryModal.value = false;
         fetchCategories();
     } catch (err) {
-        console.error("Error updating category:", err);
         error.value = [err.response?.data?.message || "Lỗi khi cập nhật danh mục"];
     } finally {
         loading.value = false;
     }
 };
 
-
 const handleDeleteCategory = async () => {
     try {
         loading.value = true;
-        await menuCategoryApi.delete(categoryIdToDelete.value);
+        await serviceCategoryApi.delete(categoryIdToDelete.value);
         successMessage.value = "Xóa danh mục thành công!";
         successModal.value = true;
         confirmationModal.value = false;
@@ -166,7 +156,7 @@ const confirmDeleteCategory = (categoryId) => {
 
 <template>
     <div class="menu-categories">
-        <h5>Quản lý danh mục món ăn </h5>
+        <h5>Quản lý danh mục dịch vụ </h5>
         <div class="Timkiem">
             <input class="inputSearch" placeholder="Tìm kiếm theo tên danh mục" v-model="searchTerm" @input="handleSearch" />
             <button class="btnThemDanhMuc" @click="addCategoryModal = true">Thêm danh mục mới</button>
@@ -312,7 +302,6 @@ const confirmDeleteCategory = (categoryId) => {
     border-radius: 8px;
 }
 .Timkiem .inputSearch {
-    
     margin-top: 10px;
     background: #dbdee0;
     width: 80%;
@@ -322,7 +311,7 @@ const confirmDeleteCategory = (categoryId) => {
     line-height: 1.5;
     border: #dbdee0 1px solid;
     display: block;
-     padding: 0.375rem 0.75rem;
+    padding: 0.375rem 0.75rem;
 }
 .Timkiem .btnThemDanhMuc {
     margin-top: 10px;
@@ -332,7 +321,6 @@ const confirmDeleteCategory = (categoryId) => {
     padding: 10px 20px;
     border-radius: 5px;
     cursor: pointer;
-    margin-bottom:  10px;
+    margin-bottom: 10px;
 }
-
 </style>

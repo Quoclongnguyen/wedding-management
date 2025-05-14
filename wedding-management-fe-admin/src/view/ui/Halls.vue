@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import { hallApi } from "@/api/hall"; // Giả sử bạn có API cho Sảnh
+import { hallApi } from "@/api/hall"; 
 import { branchApi } from "@/api/branch";
 
 // State

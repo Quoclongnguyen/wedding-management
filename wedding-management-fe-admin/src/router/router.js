@@ -8,6 +8,7 @@ import Branchs from '@/view/ui/Branchs.vue';
 import Halls from '@/view/ui/Halls.vue';
 import Menus from '@/view/ui/Menus.vue';  
 import MenuCategories from '@/view/ui/MenuCategories.vue';
+import ServiceCategories from '@/view/ui/ServiceCategories.vue';
 const routes = [
   {
     path: '/login',
@@ -44,6 +45,11 @@ const routes = [
         path: 'menu-categories',
         name: 'MenuCategories',
         component: MenuCategories ,
+      },
+       {
+        path: 'service-categories',
+        name: 'ServiceCategories',
+        component: ServiceCategories ,
       },
       
 

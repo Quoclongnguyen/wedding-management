@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import { menuApi } from "@/api/menu"; // Giả sử API của bạn
+import { menuApi } from "@/api/menu"; 
 import { branchApi } from "@/api/branch";
 
 const menus = ref([]);
