@@ -169,7 +169,7 @@ const confirmDeleteMenu = (menuId) => {
 
 <template>
     <div class="containerMenu">
-        <h2 class="text-center">Quản lý món ăn</h2>
+        <h5>Danh sách món ăn</h5>
         <div class="Timkiemmenu">
             <input class="search" placeholder="Tìm kiếm theo tên món ăn" v-model="searchTerm" @input="handleSearch" />
             <button class="btnThemMon" @click="addMenuModal = true">Thêm món ăn mới</button>

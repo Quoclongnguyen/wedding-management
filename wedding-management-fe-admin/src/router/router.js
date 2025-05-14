@@ -7,6 +7,7 @@ import AuthService from '@/service/auth-service'; // Phải có checkRoleUser()
 import Branchs from '@/view/ui/Branchs.vue';
 import Halls from '@/view/ui/Halls.vue';
 import Menus from '@/view/ui/Menus.vue';  
+import MenuCategories from '@/view/ui/MenuCategories.vue';
 const routes = [
   {
     path: '/login',
@@ -39,6 +40,13 @@ const routes = [
         name: 'Menus',
         component: Menus ,
       },
+      {
+        path: 'menu-categories',
+        name: 'MenuCategories',
+        component: MenuCategories ,
+      },
+      
+
 
     ],
   },
