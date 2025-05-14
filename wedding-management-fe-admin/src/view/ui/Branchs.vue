@@ -174,7 +174,7 @@ onMounted(fetchBranches);
     <div class="container">
         <h5 class="card-title">Quản lý Chi Nhánh</h5>
         <div class="Timkiem">
-            <input class="form-control col-3"  placeholder="Tìm kiếm theo tên hoặc địa chỉ" v-model="searchTerm"
+            <input class="form-control"  placeholder="Tìm kiếm theo tên hoặc địa chỉ" v-model="searchTerm"
                 @input="handleSearch"/>
             <button class="btnThemChinhanh" @click="addBranchModal = true">
                 Thêm chi nhánh mới
@@ -382,7 +382,7 @@ onMounted(fetchBranches);
     margin-bottom: 1rem;
 }
 
-.Timkiem {
+.Timkiem .form-control{
     margin-top: 10px;
     background: #dbdee0;
     border-radius: 8px;
@@ -403,5 +403,6 @@ onMounted(fetchBranches);
     padding: 10px 20px;
     border-radius: 5px;
     cursor: pointer;
+    margin-bottom: 10px;
 }
 </style>

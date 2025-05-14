@@ -1,5 +1,5 @@
 <template>
-  <b-card>
+  <b-card class="container">
     <b-card-body>
       <b-card-title>Quản lý tài khoản</b-card-title>
       <div class="d-flex justify-content-between mb-3">
@@ -11,7 +11,7 @@
             @input="handleSearch"
           />
         </div>
-        <b-button variant="primary" @click="addUserModal = true">
+        <b-button class="btn" @click="addUserModal = true">
           Thêm người dùng
         </b-button>
       </div>
@@ -367,3 +367,40 @@ const formatRoleName = (role) => {
 
 onMounted(fetchUsers);
 </script>
+
+
+<style scoped>
+.container {
+  max-width: 80%;
+    margin: 0 auto;
+    padding: 15px;
+    background-color: #f8f9fa;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    margin-bottom: 1rem;
+}
+
+.form-control
+{
+  margin-top: 10px;
+    background: #dbdee0;
+    border-radius: 8px;
+    display: block;
+    width: 80%;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    border: #dbdee0 1px solid;
+}
+.btn
+{
+  margin-top: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom:  10px;}
+</style>
