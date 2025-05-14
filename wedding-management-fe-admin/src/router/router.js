@@ -11,6 +11,7 @@ import MenuCategories from '@/view/ui/MenuCategories.vue';
 import ServiceCategories from '@/view/ui/ServiceCategories.vue';
 import Services from '@/view/ui/Services.vue';
 import Invoices from '@/view/ui/Invoices.vue';
+import Feedbacks from '@/view/ui/Feedbacks.vue';
 const routes = [
   {
     path: '/login',
@@ -63,7 +64,11 @@ const routes = [
         name: 'Invoices',
         component: Invoices ,
       },
-      
+      {
+        path: 'feedbacks',
+        name: 'Feedbacks',
+        component: Feedbacks,
+      },
       
       
 
