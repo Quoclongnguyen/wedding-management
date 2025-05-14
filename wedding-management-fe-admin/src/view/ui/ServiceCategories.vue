@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import { serviceCategoryApi } from "@/api/serviceCategory"; // API của bạn
+import { serviceCategoryApi } from "@/api/serviceCategory"; 
 
 const categories = ref([]);
 const currentPage = ref(0);
