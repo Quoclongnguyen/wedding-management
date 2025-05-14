@@ -9,6 +9,7 @@ import Halls from '@/view/ui/Halls.vue';
 import Menus from '@/view/ui/Menus.vue';  
 import MenuCategories from '@/view/ui/MenuCategories.vue';
 import ServiceCategories from '@/view/ui/ServiceCategories.vue';
+import Services from '@/view/ui/Services.vue';
 const routes = [
   {
     path: '/login',
@@ -51,6 +52,12 @@ const routes = [
         name: 'ServiceCategories',
         component: ServiceCategories ,
       },
+      {
+        path: 'services',
+        name: 'Services',
+        component: Services ,
+      },
+      
       
 
 
