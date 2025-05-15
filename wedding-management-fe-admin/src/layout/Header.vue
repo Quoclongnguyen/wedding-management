@@ -3,10 +3,12 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import LogoWhite from './LogoWhite.vue';
 import AuthService from '@/service/auth-service';
+import user1 from '@/assets/images/users/user1.jpg'; // Đường dẫn đến ảnh người dùnsg
+
 
 const isOpen = ref(false);
 const dropdownOpen = ref(false);
-const user1 = '../assets/images/users/user1.jpg'; // Đường dẫn đến ảnh người dùng
+
 const router = useRouter();
 
 const showMobilemenu = () => {
@@ -52,7 +54,7 @@ const handleLogout = () => {
     </div>
 
     <!-- Dropdown menu -->
-    <div class="dropdown">
+    <div class="dropdown" >
       <button
         class="btn btn-primary dropdown-toggle"
         type="button"
@@ -92,4 +94,5 @@ const handleLogout = () => {
 .navbar {
   height: 45px;
 }
+
 </style>

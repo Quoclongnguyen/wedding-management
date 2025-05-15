@@ -4,12 +4,8 @@
       <b-card-title>Quản lý tài khoản</b-card-title>
       <div class="d-flex justify-content-between mb-3">
         <div class="col-4">
-          <input
-            class="form-control"
-            placeholder="Tìm kiếm theo email hoặc tên"
-            v-model="searchTerm"
-            @input="handleSearch"
-          />
+          <input class="form-control" placeholder="Tìm kiếm theo email hoặc tên" v-model="searchTerm"
+            @input="handleSearch" />
         </div>
         <b-button class="btn" @click="addUserModal = true">
           Thêm người dùng
@@ -23,12 +19,8 @@
             {{ item.firstName }} {{ item.lastName }}
           </template>
           <template #cell(roles)="{ item }">
-            <span
-              v-for="(role, index) in item.roles"
-              :key="index"
-              class="badge me-1"
-              :class="'bg-' + getRoleBadgeColor(role)"
-            >
+            <span v-for="(role, index) in item.roles" :key="index" class="badge me-1"
+              :class="'bg-' + getRoleBadgeColor(role)">
               {{ formatRoleName(role) }}
             </span>
           </template>
@@ -47,12 +39,7 @@
             <li class="page-item" :class="{ disabled: currentPage === 0 }">
               <button class="page-link" @click="currentPage--" :disabled="currentPage === 0">Trước</button>
             </li>
-            <li
-              v-for="page in pageCount"
-              :key="page"
-              class="page-item"
-              :class="{ active: currentPage === page - 1 }"
-            >
+            <li v-for="page in pageCount" :key="page" class="page-item" :class="{ active: currentPage === page - 1 }">
               <button class="page-link" @click="currentPage = page - 1">{{ page }}</button>
             </li>
             <li class="page-item" :class="{ disabled: currentPage >= pageCount - 1 }">
@@ -168,19 +155,14 @@
       <b-button variant="primary" @click="successModal = false">Đóng</b-button>
     </template>
   </b-modal>
+
 </template>
 
 <script setup>
+
 import { ref, computed, onMounted } from 'vue';
 import { accountApi } from '@/api/account';
-import {
-  BCard,
-  BCardBody,
-  BCardTitle,
-  BTable,
-  BButton,
-  BModal,
-} from 'bootstrap-vue-3';
+
 
 
 
@@ -372,35 +354,35 @@ onMounted(fetchUsers);
 <style scoped>
 .container {
   max-width: 80%;
-    margin: 0 auto;
-    padding: 15px;
-    background-color: #f8f9fa;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
-    margin-bottom: 1rem;
+  margin: 0 auto;
+  padding: 15px;
+  background-color: #f8f9fa;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  margin-bottom: 1rem;
 }
 
-.form-control
-{
+.form-control {
   margin-top: 10px;
-    background: #dbdee0;
-    border-radius: 8px;
-    display: block;
-    width: 80%;
-    padding: 0.375rem 0.75rem;
-    font-size: 1rem;
-    font-weight: 400;
-    line-height: 1.5;
-    border: #dbdee0 1px solid;
+  background: #dbdee0;
+  border-radius: 8px;
+  display: block;
+  width: 80%;
+  padding: 0.375rem 0.75rem;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  border: #dbdee0 1px solid;
 }
-.btn
-{
+
+.btn {
   margin-top: 10px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-bottom:  10px;}
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
 </style>

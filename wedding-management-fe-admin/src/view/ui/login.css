@@ -6,7 +6,12 @@
     align-items: center;
     justify-content: center;
 }
+.eror-box {
+    color: red;
+    margin-bottom: 10px;
+    text-align:  center;
 
+}
 .login-container {
     width: 100%;
     max-width: 450px;
@@ -82,6 +87,7 @@
     border-color: #feb2b2;
     color: #c53030;
 }
+
 
 @keyframes spin {
     from {

@@ -88,10 +88,11 @@ const handleLogin = async () => {
         </div>
 
         <!-- Hiển thị lỗi nếu có -->
-        <b-alert v-if="error" variant="danger" class="mb-4" show>
+        <div v-if="error" class="eror-box" show>
+          
           <i class="bi bi-exclamation-circle me-2"></i>
           {{ error }}
-        </b-alert>
+        </div>
 
         <!-- Form đăng nhập -->
         <b-form @submit.prevent="handleLogin">
