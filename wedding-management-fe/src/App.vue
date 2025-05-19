@@ -1,47 +1,23 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
+import Header from '@/layout/Header/Header.vue'
+import Footer from '@/layout/Footer.vue'
+import { useRoute } from 'vue-router'
+import 'bootstrap/dist/css/bootstrap.min.css'
+
+
+const route = useRoute()
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-    </div>
-  </header>
-
-  <main>
-    <TheWelcome />
-  </main>
+  <div>
+    <!-- Hiển thị Header nếu không phải trang Login hoặc Register -->
+    <Header v-if="!['/login', '/register'].includes(route.path)" />
+    <router-view />
+    <!-- Hiển thị Footer nếu không phải trang Login hoặc Register -->
+    <Footer v-if="!['/login', '/register'].includes(route.path)" />
+  </div>
 </template>
 
 <style scoped>
-header {
-  line-height: 1.5;
-}
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-}
+/* Thêm style nếu cần */
 </style>
