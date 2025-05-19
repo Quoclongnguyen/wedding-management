@@ -100,7 +100,8 @@ const token = ref(Cookies.get("token_user"))
 const router = useRouter()
 
 const handleLogout = () => {
-  Cookies.remove("token_user")
-  router.push("/")
+  Cookies.remove("token_user") // xóa token khỏi cookie
+  token.value = null // cập nhật giá trị token trong Vue
+  router.push("/") // chuyển về trang chủ
 }
 </script>

@@ -7,13 +7,8 @@
           <label class="form-label">{{ field.label }}</label>
           <div class="input-group">
             <component :is="field.icon" class="input-icon" />
-            <input
-              :type="field.type"
-              class="form-control"
-              :name="field.name"
-              v-model="formValue[field.name]"
-              :placeholder="field.placeholder"
-            />
+            <input :type="field.type" class="form-control" :name="field.name" v-model="formValue[field.name]"
+              :placeholder="field.placeholder" />
           </div>
           <div v-if="formError[field.name]" class="error">{{ formError[field.name] }}</div>
         </div>
@@ -36,6 +31,7 @@ import { reactive, ref } from "vue"
 import { useRouter, RouterLink } from "vue-router"
 import { useToast } from "vue-toastification"
 import Cookies from "js-cookie"
+import "./Register.scss";
 
 // Icons from FontAwesome Vue 3
 import { faUser, faEnvelope, faLock, faPhone } from '@fortawesome/free-solid-svg-icons'
@@ -138,6 +134,6 @@ async function handleSubmit() {
 }
 </script>
 
-<style scoped lang="scss">
-@import "./Register.scss";
+<style >
+
 </style>
