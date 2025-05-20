@@ -129,7 +129,7 @@ import DatePicker from "vue-datepicker-next";
 import "vue-datepicker-next/index.css";
 import { useToast } from "vue-toastification";
 import "./ListHall.scss";
-import Spinner from "@/components/common/Spinner.vue"; 
+import LoadingOverlay from '@/components/Context/LoadingOverlay.vue'
 import Modal from "@/components/common/Modal.vue";
 const router = useRouter();
 const toast = useToast();

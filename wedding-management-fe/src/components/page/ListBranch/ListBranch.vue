@@ -64,7 +64,7 @@ import { ref, onMounted } from 'vue'
 import Cookies from 'js-cookie'
 import jwt_decode from 'jwt-decode'
 import { useToast } from 'vue-toastification'
-import Spinner from '@/components/common/Spinner.vue'
+import LoadingOverlay from '@/components/Context/LoadingOverlay.vue'
 import CustomRating from '@/components/Context/CustomRating.vue'
 import "./ListBranch.scss"
 
