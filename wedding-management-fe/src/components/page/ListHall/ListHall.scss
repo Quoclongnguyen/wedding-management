@@ -281,7 +281,39 @@ body .page-container {
     }
 }
 
-/* Styles cho React Bootstrap components */
+.modal-header {
+  background: linear-gradient(90deg, #fe8e5c 0%, #f5576c 100%);
+  font-size: 1.5rem;
+  font-weight: 700;
+  padding: 1rem;
+  border-bottom: 1px solid #ddd;
+}
+.modal-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Căn theo chiều ngang */
+  justify-content: center; /* Căn theo chiều dọc */
+ 
+}
+.modal-image {
+  max-width: 100%; 
+  border-radius: 8px;
+  max-height: 250px; 
+  object-fit: cover; 
+  margin-bottom: 20px; 
+}
+.btn-secondary{
+    background: linear-gradient(90deg, #fe8e5c 0%, #f5576c 100%) !important;
+    
+}
+.modal-body {
+  
+  padding: 1rem;
+  background-color: #fff;
+  color: #333;
+  
+  
+}
 .card {
     &.hall-card {
         border: none !important;

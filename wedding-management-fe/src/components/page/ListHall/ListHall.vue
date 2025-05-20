@@ -74,7 +74,7 @@
         </div>
       </template>
       <template #footer>
-        <button class="btn btn-secondary" @click="closeModal">Đóng</button>
+        <button class="btn-secondary" @click="closeModal">Đóng</button>
       </template>
     </Modal>
 
