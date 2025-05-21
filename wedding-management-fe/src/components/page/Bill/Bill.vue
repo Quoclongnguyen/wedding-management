@@ -102,9 +102,7 @@
                   <textarea id="note" class="form-control" v-model="note"
                     placeholder="Nhập ghi chú (nếu có)"></textarea>
                 </div>
-                <button type="button" class="btn btn-success mt-3" @click="handleSubmitOrder">
-                  Xác Nhận Đặt Hàng
-                </button>
+               
               </Accordion.Body>
             </Accordion.Item>
 
@@ -149,8 +147,36 @@
                 </div>
                 <p v-if="discount > 0" class="mt-3">
                   Đã áp dụng mã giảm giá: <strong>{{ selectedPromoCode.codeName }}</strong> - Giảm <strong>{{ discount
-                  }}%</strong>
+                    }}%</strong>
                 </p>
+              </Accordion.Body>
+            </Accordion.Item>
+
+            <Accordion.Item eventKey="7">
+              <Accordion.Header>Kiểm Tra và Xác Nhận Đơn Hàng</Accordion.Header>
+              <Accordion.Body class="body">
+                <div class="order-review">
+                  <h5>Chi Nhánh: {{branchs.find(branch => branch.branchId === selectedBranchId)?.name || "Chưa chọn"}}
+                  </h5>
+                  <h5>Sảnh Cưới: {{hallsByBranch.find(hall => hall.hallId === selectedHallId)?.name || "Chưa chọn"}}
+                  </h5>
+                  <h5>Thực Đơn:</h5>
+                  <ul>
+                    <li v-for="menuId in selectedMenus" :key="menuId">
+                      {{menus.find(menu => menu.menuId === menuId)?.name || "Không xác định"}}
+                    </li>
+                  </ul>
+                  <h5>Dịch Vụ:</h5>
+                  <ul>
+                    <li v-for="serviceId in selectedServices" :key="serviceId">
+                      {{services.find(service => service.serviceId === serviceId)?.name || "Không xác định"}}
+                    </li>
+                  </ul>
+                  <h5>Tổng Tiền: {{ formatPrice(calculateTotalPrice()) }}</h5>
+                  <button type="button" class="btn btn-primary mt-3" @click="confirmOrder">
+                    Xác Nhận Đơn Hàng
+                  </button>
+                </div>
               </Accordion.Body>
             </Accordion.Item>
           </Accordion>
@@ -278,8 +304,7 @@ const handleServiceCheckboxChange = (serviceId) => {
 };
 
 
-
-const validateOrder = () => {
+const validateOrder = async () => {
   // Kiểm tra thông tin người dùng
   if (!fullName.value.trim()) {
     toast.error("Vui lòng nhập họ và tên!");
@@ -300,15 +325,52 @@ const validateOrder = () => {
     return false;
   }
 
+  // Kiểm tra ngày tổ chức hợp lệ (ít nhất 20 ngày từ hôm nay)
+  const currentDate = new Date();
+  const selectedDateObj = new Date(selectedDate.value);
+  const minDate = new Date();
+  minDate.setDate(currentDate.getDate() + 20);
+
+  if (selectedDateObj < minDate) {
+    toast.error("Ngày tổ chức phải cách ít nhất 20 ngày từ hôm nay!");
+    return false;
+  }
+
+  // Kiểm tra số lượng món ăn
+  if (selectedMenus.value.length < 3) {
+    toast.error("Vui lòng chọn ít nhất 3 món ăn!");
+    return false;
+  }
+
+  // Kiểm tra sảnh không bị trùng
+  try {
+    const response = await axios.post("https://localhost:7296/api/invoice/checked", {
+      AttendanceDate: selectedDate.value,
+      HallId: selectedHallId.value,
+      TimeHall: selectedTimeSlot.value,
+    });
+
+    if (response.status === 400) {
+      toast.error("Sảnh đã được đặt vào thời gian này. Vui lòng chọn sảnh khác!");
+      return false;
+    }
+  } catch (error) {
+    console.error("Error checking hall availability:", error);
+    toast.error("Không thể kiểm tra trạng thái sảnh. Vui lòng thử lại!");
+    return false;
+  }
+
   return true;
 };
 
-const handleSubmitOrder = () => {
-  if (!validateOrder()) {
+const handleSubmitOrder = async () => {
+  const isValid = await validateOrder();
+  if (!isValid) {
     return;
   }
-  // Tiếp tục xử lý đặt hàng...
+
   toast.success("Thông tin hợp lệ! Đang xử lý đơn hàng...");
+  // Gửi dữ liệu đơn hàng đến API hoặc thực hiện các bước tiếp theo
 };
 
 
@@ -339,22 +401,55 @@ const applyPromoCode = () => {
 const calculateTotalPrice = () => {
   const menuTotal = selectedMenus.value.reduce((acc, menuId) => {
     const menu = menus.value.find((m) => m.menuId === menuId);
-    return acc + (menu ? menu.price : 0);
+    return acc + (menu?.price || 0); // Sử dụng giá trị mặc định 0 nếu không tìm thấy menu
   }, 0);
 
   const serviceTotal = selectedServices.value.reduce((acc, serviceId) => {
     const service = services.value.find((s) => s.serviceId === serviceId);
-    return acc + (service ? service.price : 0);
+    return acc + (service?.price || 0); // Sử dụng giá trị mặc định 0 nếu không tìm thấy service
   }, 0);
 
   const hall = hallsByBranch.value.find((h) => h.hallId === selectedHallId.value);
-  const hallTotal = hall ? hall.price : 0;
+  const hallTotal = hall?.price || 0; // Sử dụng giá trị mặc định 0 nếu không tìm thấy hall
 
   const totalBeforeDiscount = menuTotal + serviceTotal + hallTotal;
   const discountedAmount = (discount.value / 100) * totalBeforeDiscount;
   return totalBeforeDiscount - discountedAmount;
 };
 
+const confirmOrder = async () => {
+  const isValid = await validateOrder(); // Thêm await
+  if (!isValid) {
+    return;
+  }
+
+  // Tiếp tục xử lý đặt hàng nếu hợp lệ
+  const orderData = {
+    branchId: selectedBranchId.value,
+    hallId: selectedHallId.value,
+    menus: selectedMenus.value,
+    services: selectedServices.value,
+    fullName: fullName.value,
+    phoneNumber: phoneNumber.value,
+    note: note.value,
+    date: selectedDate.value,
+    timeSlot: selectedTimeSlot.value,
+    totalPrice: calculateTotalPrice(),
+    promoCode: selectedPromoCode.value?.codeId || null,
+  };
+
+  try {
+    const response = await axios.post("https://localhost:7296/api/invoice", orderData);
+    if (response.status === 200) {
+      toast.success("Đơn hàng đã được xác nhận!");
+    } else {
+      toast.error("Xác nhận đơn hàng thất bại!");
+    }
+  } catch (error) {
+    console.error("Error confirming order:", error);
+    toast.error("Đã xảy ra lỗi khi xác nhận đơn hàng!");
+  }
+};
 
 
 
