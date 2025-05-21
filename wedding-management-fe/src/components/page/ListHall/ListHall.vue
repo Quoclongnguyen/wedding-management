@@ -38,7 +38,7 @@
               </div>
               <div class="button-group">
                 <button class="book-button" @click="navigateToBill">
-                  <font-awesome-icon icon="cart-check" class="icon" />
+                  <font-awesome-icon icon="cart-shopping" />
                   Đặt Ngay
                 </button>
                 <button

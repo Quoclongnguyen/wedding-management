@@ -77,7 +77,7 @@ import { ref, onMounted } from "vue";
 import { useToast } from "vue-toastification";
 import LoadingOverlay from "@/components/Context/LoadingOverlay.vue";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { faUtensils, faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+
 import "./ListMenu.scss";
 
 const menus = ref([]);
