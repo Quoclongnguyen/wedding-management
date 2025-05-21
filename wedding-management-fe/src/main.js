@@ -8,11 +8,11 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faEnvelope, faLock, faUserPlus, faCircleUser ,faBell ,faClipboard } from '@fortawesome/free-solid-svg-icons'
+import { faEnvelope, faLock, faUserPlus, faCircleUser ,faBell ,faClipboard,  faMoneyBillWave,faCartShopping,faCircleInfo } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 
-library.add(faEnvelope, faLock, faUserPlus ,faCircleUser, faBell ,faClipboard )
+library.add(faEnvelope, faLock, faUserPlus ,faCircleUser, faBell ,faClipboard, faMoneyBillWave, faCartShopping,faCircleInfo)
 const app = createApp(App)
 app.use(BootstrapVue3)
 app.component('font-awesome-icon', FontAwesomeIcon)

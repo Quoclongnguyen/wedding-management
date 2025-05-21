@@ -6,6 +6,7 @@ import Profile from '@/components/page/Profile/Profile.vue'
 import ListHall from '@/components/page/ListHall/ListHall.vue'
 import ListBranch from '@/components/page/ListBranch/ListBranch.vue'
 import ListMenu from '@/components/page/ListMenu/ListMenu.vue'
+import ListService from '@/components/page/ListService/ListService.vue'
 
 
 
@@ -22,6 +23,7 @@ const routes = [
   { path: '/listHall', name: 'ListHall', component: ListHall },
   { path: '/listbranch', name :'ListBranch', component: ListBranch},
   { path: '/listmenu', name :'ListMenu', component: ListMenu},
+  { path: '/listservice', name :'ListService', component: ListService},
 
  
 
