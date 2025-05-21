@@ -107,6 +107,52 @@
                 </button>
               </Accordion.Body>
             </Accordion.Item>
+
+            <Accordion.Item eventKey="5">
+              <Accordion.Header>Chọn Ngày và Buổi Tổ Chức</Accordion.Header>
+              <Accordion.Body class="body">
+                <div class="form-group">
+                  <label for="selectedDate">Ngày Tổ Chức:</label>
+                  <input id="selectedDate" type="date" class="form-control" v-model="selectedDate"
+                    placeholder="Chọn ngày tổ chức" />
+                </div>
+                <div class="form-group mt-3">
+                  <label for="selectedTimeSlot">Buổi Tổ Chức:</label>
+                  <select id="selectedTimeSlot" class="form-control" v-model="selectedTimeSlot">
+                    <option value="" disabled>Chọn buổi tổ chức</option>
+                    <option v-for="slot in timeSlots" :key="slot" :value="slot">
+                      {{ slot }}
+                    </option>
+                  </select>
+                </div>
+              </Accordion.Body>
+            </Accordion.Item>
+
+
+            <Accordion.Item eventKey="6">
+              <div class="order-summary mt-4">
+                <h5>Tổng Tiền Trước Giảm Giá: {{ formatPrice(calculateTotalPrice() + (discount / 100) *
+                  calculateTotalPrice()) }}</h5>
+                <h5>Giảm Giá: {{ discount }}%</h5>
+                <h5>Tổng Tiền Sau Giảm Giá: {{ formatPrice(calculateTotalPrice()) }}</h5>
+              </div>
+              <Accordion.Header>Áp Dụng Mã Giảm Giá</Accordion.Header>
+              <Accordion.Body class="body">
+                <div class="form-group">
+                  <label for="promoCode">Chọn Mã Giảm Giá:</label>
+                  <select id="promoCode" class="form-control" v-model="selectedPromoCode" @change="applyPromoCode">
+                    <option value="" disabled>Chọn mã giảm giá</option>
+                    <option v-for="code in promoCodes" :key="code.codeId" :value="code">
+                      {{ code.codeName }} - Giảm {{ code.discount }}%
+                    </option>
+                  </select>
+                </div>
+                <p v-if="discount > 0" class="mt-3">
+                  Đã áp dụng mã giảm giá: <strong>{{ selectedPromoCode.codeName }}</strong> - Giảm <strong>{{ discount
+                  }}%</strong>
+                </p>
+              </Accordion.Body>
+            </Accordion.Item>
           </Accordion>
         </form>
       </div>
@@ -135,7 +181,15 @@ const selectedServices = ref([]);
 const fullName = ref("");
 const phoneNumber = ref("");
 const note = ref("");
+// state cho ngày tổ chức
+const selectedDate = ref(null); // Ngày tổ chức
+const selectedTimeSlot = ref(""); // Buổi tổ chức (sáng, chiều, tối)
+const timeSlots = ref(["Sáng", "Chiều", "Tối"]); // Các buổi tổ chức
 
+// state cho mã giam giá
+const promoCodes = ref([]); // Danh sách mã giảm giá
+const selectedPromoCode = ref(null); // Mã giảm giá đã chọn
+const discount = ref(0); // Giá trị giảm giá
 
 // Toast thông báo
 const toast = useToast();
@@ -223,8 +277,10 @@ const handleServiceCheckboxChange = (serviceId) => {
   }
 };
 
-// logic xử lý khi người dùng nhấn nút Đặt
-const validateCustomerInfo = () => {
+
+
+const validateOrder = () => {
+  // Kiểm tra thông tin người dùng
   if (!fullName.value.trim()) {
     toast.error("Vui lòng nhập họ và tên!");
     return false;
@@ -233,11 +289,22 @@ const validateCustomerInfo = () => {
     toast.error("Vui lòng nhập số điện thoại hợp lệ (10 chữ số)!");
     return false;
   }
+
+  // Kiểm tra thông tin ngày và buổi tổ chức
+  if (!selectedDate.value) {
+    toast.error("Vui lòng chọn ngày tổ chức!");
+    return false;
+  }
+  if (!selectedTimeSlot.value) {
+    toast.error("Vui lòng chọn buổi tổ chức!");
+    return false;
+  }
+
   return true;
 };
-// Hàm xử lý khi người dùng nhấn nút Đặt hàng
+
 const handleSubmitOrder = () => {
-  if (!validateCustomerInfo()) {
+  if (!validateOrder()) {
     return;
   }
   // Tiếp tục xử lý đặt hàng...
@@ -245,11 +312,61 @@ const handleSubmitOrder = () => {
 };
 
 
+//hàm gọi API để lấy danh sách mã giảm giá
+const fetchPromoCodes = async () => {
+  try {
+    const response = await axios.get("https://localhost:7296/api/invoice/promo-code");
+    promoCodes.value = response.data.filter((code) => {
+      const currentDate = new Date();
+      const expiryDate = new Date(code.expirationDate);
+      return expiryDate > currentDate; // Chỉ lấy mã giảm giá còn hiệu lực
+    });
+  } catch (error) {
+    console.error("Error fetching promo codes:", error);
+    toast.error("Không thể tải danh sách mã giảm giá!");
+  }
+};
+// hàm xử lý khi nguoi dùng chọn mã giảm giá
+const applyPromoCode = () => {
+  if (selectedPromoCode.value) {
+    discount.value = selectedPromoCode.value.discount; // Lấy giá trị giảm giá từ mã đã chọn
+    toast.success(`Đã áp dụng mã giảm giá: ${selectedPromoCode.value.codeName}`);
+  } else {
+    discount.value = 0; // Không áp dụng mã giảm giá
+    toast.error("Vui lòng chọn mã giảm giá hợp lệ!");
+  }
+};
+const calculateTotalPrice = () => {
+  const menuTotal = selectedMenus.value.reduce((acc, menuId) => {
+    const menu = menus.value.find((m) => m.menuId === menuId);
+    return acc + (menu ? menu.price : 0);
+  }, 0);
+
+  const serviceTotal = selectedServices.value.reduce((acc, serviceId) => {
+    const service = services.value.find((s) => s.serviceId === serviceId);
+    return acc + (service ? service.price : 0);
+  }, 0);
+
+  const hall = hallsByBranch.value.find((h) => h.hallId === selectedHallId.value);
+  const hallTotal = hall ? hall.price : 0;
+
+  const totalBeforeDiscount = menuTotal + serviceTotal + hallTotal;
+  const discountedAmount = (discount.value / 100) * totalBeforeDiscount;
+  return totalBeforeDiscount - discountedAmount;
+};
+
+
+
+
+
+
+
 // Lifecycle hook
 onMounted(() => {
   fetchBranches();
   fetchMenus();
   fetchServices();
+  fetchPromoCodes(); // Gọi API lấy mã giảm giá
 });
 </script>
 
