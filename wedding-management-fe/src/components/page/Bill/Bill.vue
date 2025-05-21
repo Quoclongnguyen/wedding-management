@@ -63,6 +63,50 @@
                 </div>
               </Accordion.Body>
             </Accordion.Item>
+
+
+            <Accordion.Item eventKey="3">
+              <Accordion.Header>Dịch Vụ</Accordion.Header>
+              <Accordion.Body class="body">
+                <div v-for="(service, index) in services" :key="index" class="menu-card" style="width: 18rem;">
+                  <img class="image-fixed-height" :src="service.image" alt="Service Image" />
+                  <div class="card-body">
+                    <h5 class="card-title">{{ service.name }}</h5>
+                    <p class="card-text">Mô tả: {{ service.description }}</p>
+                    <p class="card-text">Giá: {{ formatPrice(service.price) }}</p>
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" :id="'flexCheckService-' + index"
+                        :checked="selectedServices.includes(service.serviceId)"
+                        @change="handleServiceCheckboxChange(service.serviceId)" />
+                    </div>
+                  </div>
+                </div>
+              </Accordion.Body>
+            </Accordion.Item>
+
+            <Accordion.Item eventKey="4">
+              <Accordion.Header>Thông Tin Người Đặt</Accordion.Header>
+              <Accordion.Body class="body">
+                <div class="form-group">
+                  <label for="fullName">Họ và Tên:</label>
+                  <input id="fullName" type="text" class="form-control" v-model="fullName"
+                    placeholder="Nhập họ và tên" />
+                </div>
+                <div class="form-group">
+                  <label for="phoneNumber">Số Điện Thoại:</label>
+                  <input id="phoneNumber" type="tel" class="form-control" v-model="phoneNumber"
+                    placeholder="Nhập số điện thoại" />
+                </div>
+                <div class="form-group">
+                  <label for="note">Ghi Chú:</label>
+                  <textarea id="note" class="form-control" v-model="note"
+                    placeholder="Nhập ghi chú (nếu có)"></textarea>
+                </div>
+                <button type="button" class="btn btn-success mt-3" @click="handleSubmitOrder">
+                  Xác Nhận Đặt Hàng
+                </button>
+              </Accordion.Body>
+            </Accordion.Item>
           </Accordion>
         </form>
       </div>
@@ -84,6 +128,13 @@ const hallsByBranch = ref([]);
 const selectedHallId = ref(null);
 const menus = ref([]);
 const selectedMenus = ref([]);
+// state cho dịch vụ
+const services = ref([]);
+const selectedServices = ref([]);
+// state cho nhập thông tin nguoi dùng
+const fullName = ref("");
+const phoneNumber = ref("");
+const note = ref("");
 
 
 // Toast thông báo
@@ -151,13 +202,55 @@ const handleMenuCheckboxChange = (menuId) => {
   }
 };
 
+// Hàm gọi API để lấy danh sách dịch vụ
+const fetchServices = async () => {
+  try {
+    const response = await axios.get("https://localhost:7296/api/service");
+    services.value = response.data;
+  } catch (error) {
+    console.error("Error fetching services:", error);
+    toast.error("Không thể tải danh sách dịch vụ!");
+  }
+};
+// Hàm xử lý khi chọn dịch vụ
+const handleServiceCheckboxChange = (serviceId) => {
+  if (selectedServices.value.includes(serviceId)) {
+    selectedServices.value = selectedServices.value.filter((id) => id !== serviceId);
+    toast.error("Đã hủy dịch vụ!");
+  } else {
+    selectedServices.value.push(serviceId);
+    toast.success("Đã chọn dịch vụ!");
+  }
+};
+
+// logic xử lý khi người dùng nhấn nút Đặt
+const validateCustomerInfo = () => {
+  if (!fullName.value.trim()) {
+    toast.error("Vui lòng nhập họ và tên!");
+    return false;
+  }
+  if (!phoneNumber.value.trim() || !/^[0-9]{10}$/.test(phoneNumber.value)) {
+    toast.error("Vui lòng nhập số điện thoại hợp lệ (10 chữ số)!");
+    return false;
+  }
+  return true;
+};
+// Hàm xử lý khi người dùng nhấn nút Đặt hàng
+const handleSubmitOrder = () => {
+  if (!validateCustomerInfo()) {
+    return;
+  }
+  // Tiếp tục xử lý đặt hàng...
+  toast.success("Thông tin hợp lệ! Đang xử lý đơn hàng...");
+};
+
+
 // Lifecycle hook
 onMounted(() => {
   fetchBranches();
   fetchMenus();
+  fetchServices();
 });
 </script>
 
-<style scoped>
-/* Thêm style nếu cần */
-</style>
+<style scoped></style>
