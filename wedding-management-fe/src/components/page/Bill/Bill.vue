@@ -1,9 +1,6 @@
 <template>
   <div class="bill">
-    <div
-      class="bill-page"
-      style="display: flex; justify-content: center; align-items: center;"
-    >
+    <div class="bill-page" style="display: flex; justify-content: center; align-items: center;">
       <div class="bill-form-container display-flex justify-content-center align-items-center">
         <h1 class="title">Đơn Hàng</h1>
         <form>
@@ -13,24 +10,16 @@
               <Accordion.Header>Chi Nhánh</Accordion.Header>
               <Accordion.Body class="body">
                 <div v-for="(branch, index) in branchs" :key="index" class="menu-card" style="width: 18rem;">
-                  <img
-                    class="image-fixed-height"
-                    :src="branch.image"
-                    alt="Branch Image"
-                  />
+                  <img class="image-fixed-height" :src="branch.image" alt="Branch Image" />
                   <div class="card-body">
                     <h5 class="card-title">{{ branch.name }}</h5>
                     <p class="card-text">Mô tả: {{ branch.description }}</p>
                     <p class="card-text">Địa chỉ: {{ branch.address }}</p>
                     <p class="card-text">SDT: {{ branch.phone }}</p>
                     <div class="form-check">
-                      <input
-                        class="form-check-input"
-                        type="checkbox"
-                        :id="'flexCheckDefault-' + index"
+                      <input class="form-check-input" type="checkbox" :id="'flexCheckDefault-' + index"
                         :checked="branch.branchId === selectedBranchId"
-                        @change="handleBranchCheckboxChange(branch.branchId)"
-                      />
+                        @change="handleBranchCheckboxChange(branch.branchId)" />
                     </div>
                   </div>
                 </div>
@@ -42,23 +31,33 @@
               <Accordion.Header>Sảnh Cưới</Accordion.Header>
               <Accordion.Body class="body">
                 <div v-for="(hall, index) in hallsByBranch" :key="index" class="menu-card" style="width: 18rem;">
-                  <img
-                    class="image-fixed-height"
-                    :src="hall.image"
-                    alt="Hall Image"
-                  />
+                  <img class="image-fixed-height" :src="hall.image" alt="Hall Image" />
                   <div class="card-body">
                     <h5 class="card-title">{{ hall.name }}</h5>
                     <p class="card-text">Sức chứa: {{ hall.capacity }}</p>
                     <p class="card-text">Giá: {{ formatPrice(hall.price) }}</p>
                     <div class="form-check">
-                      <input
-                        class="form-check-input"
-                        type="checkbox"
-                        :id="'flexCheckHall-' + index"
-                        :checked="hall.hallId === selectedHallId"
-                        @change="handleHallCheckboxChange(hall.hallId)"
-                      />
+                      <input class="form-check-input" type="checkbox" :id="'flexCheckHall-' + index"
+                        :checked="hall.hallId === selectedHallId" @change="handleHallCheckboxChange(hall.hallId)" />
+                    </div>
+                  </div>
+                </div>
+              </Accordion.Body>
+            </Accordion.Item>
+
+            <Accordion.Item eventKey="2">
+              <Accordion.Header>Thực Đơn</Accordion.Header>
+              <Accordion.Body class="body">
+                <div v-for="(menu, index) in menus" :key="index" class="menu-card" style="width: 18rem;">
+                  <img class="image-fixed-height" :src="menu.image" alt="Menu Image" />
+                  <div class="card-body">
+                    <h5 class="card-title">{{ menu.name }}</h5>
+                    <p class="card-text">Mô tả: {{ menu.description }}</p>
+                    <p class="card-text">Giá: {{ formatPrice(menu.price) }}</p>
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" :id="'flexCheckMenu-' + index"
+                        :checked="selectedMenus.includes(menu.menuId)"
+                        @change="handleMenuCheckboxChange(menu.menuId)" />
                     </div>
                   </div>
                 </div>
@@ -83,6 +82,8 @@ const branchs = ref([]);
 const selectedBranchId = ref(null);
 const hallsByBranch = ref([]);
 const selectedHallId = ref(null);
+const menus = ref([]);
+const selectedMenus = ref([]);
 
 
 // Toast thông báo
@@ -129,9 +130,31 @@ const formatPrice = (price) => {
   }).format(price);
 };
 
+// Hàm gọi API để lấy danh sách thực đơn
+const fetchMenus = async () => {
+  try {
+    const response = await axios.get("https://localhost:7296/api/menu");
+    menus.value = response.data;
+  } catch (error) {
+    console.error("Error fetching menus:", error);
+    toast.error("Không thể tải danh sách thực đơn!");
+  }
+};
+// Hàm xử lý khi chọn món ăn
+const handleMenuCheckboxChange = (menuId) => {
+  if (selectedMenus.value.includes(menuId)) {
+    selectedMenus.value = selectedMenus.value.filter((id) => id !== menuId);
+    toast.error("Đã hủy món ăn!");
+  } else {
+    selectedMenus.value.push(menuId);
+    toast.success("Đã chọn món ăn!");
+  }
+};
+
 // Lifecycle hook
 onMounted(() => {
   fetchBranches();
+  fetchMenus();
 });
 </script>
 
