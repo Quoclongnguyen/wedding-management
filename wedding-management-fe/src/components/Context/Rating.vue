@@ -1,4 +1,4 @@
-<!-- filepath: d:\workspace\vue\wedding-vue\wedding-management-main\wedding-management-fe\wedding-management-fe\src\components\Context\Rating.vue -->
+
 <template>
   <div class="star-rating">
     <!-- Hiển thị sao đầy -->

@@ -14,13 +14,17 @@
     "@fortawesome/vue-fontawesome": "^3.0.8",
     "axios": "^1.9.0",
     "bootstrap": "^5.3.6",
+    "bootstrap-vue-3": "^0.5.1",
     "element-plus": "^2.9.10",
     "js-cookie": "^3.0.5",
     "jwt-decode": "^3.1.2",
     "vue": "^3.5.13",
+    "vue-datepicker-next": "^1.0.3",
     "vue-icons": "^2.0.0",
     "vue-router": "^4.5.1",
-    "vue-toastification": "^2.0.0-rc.5"
+    "vue-star-rating": "^1.7.0",
+    "vue-toastification": "^2.0.0-rc.5",
+    "vue3-star-ratings": "^3.0.5"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.3",

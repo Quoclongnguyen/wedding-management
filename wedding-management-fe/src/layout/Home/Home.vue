@@ -55,6 +55,7 @@
         </div>
       </div>
     </div>
+    
     <!-- Gọi component khác 
     <Branch />
     <Hall />
@@ -68,6 +69,7 @@
 import { RouterLink } from 'vue-router'
 import Button from '@/components/Button/button.vue'
 import "./Home.scss"
+
 
 // Đường dẫn ảnh, nhớ sửa lại nếu khác
 import imgSrc from '@/assets/assets/img_1.png'
