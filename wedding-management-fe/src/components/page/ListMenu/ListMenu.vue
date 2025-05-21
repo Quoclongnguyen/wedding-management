@@ -1,5 +1,4 @@
-<!-- filepath: d:\workspace\vue\wedding-vue\wedding-management-main\wedding-management-fe\wedding-management-fe\src\components\page\ListMenu\ListMenu.vue -->
-<template>
+ <template>
   <div class="page-container">
     <div class="header-section">
       <h1>DANH SÁCH THỰC ĐƠN</h1>
@@ -65,6 +64,9 @@
           <p class="price">Giá: {{ formatPrice(selectedService.price) }}</p>
           <p class="description">{{ selectedService.description }}</p>
         </div>
+        <button class="close-button" @click="showModal = false">
+          Đóng
+        </button>
       </div>
     </b-modal>
   </div>
@@ -94,7 +96,7 @@ onMounted(async () => {
   try {
     loading.value = true;
     const menuResponse = await fetch("https://localhost:7296/api/menu");
-    const categoryResponse = await fetch("https://localhost:7296/api/category");
+    const categoryResponse = await fetch("https://localhost:7296/api/menu/getCate");
 
     if (!menuResponse.ok || !categoryResponse.ok) {
       throw new Error("Failed to fetch data");
