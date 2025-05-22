@@ -102,7 +102,7 @@
                   <textarea id="note" class="form-control" v-model="note"
                     placeholder="Nhập ghi chú (nếu có)"></textarea>
                 </div>
-               
+
               </Accordion.Body>
             </Accordion.Item>
 
@@ -192,7 +192,8 @@ import "./Bill.scss";
 import { ref, onMounted } from "vue";
 import { useToast } from "vue-toastification";
 import axios from "axios";
-
+import Cookies from "js-cookie";
+import jwt_decode from "jwt-decode";
 // State
 const branchs = ref([]);
 const selectedBranchId = ref(null);
@@ -305,52 +306,40 @@ const handleServiceCheckboxChange = (serviceId) => {
 
 
 const validateOrder = async () => {
-  // Kiểm tra thông tin người dùng
   if (!fullName.value.trim()) {
+    console.log("Họ và tên không hợp lệ");
     toast.error("Vui lòng nhập họ và tên!");
     return false;
   }
   if (!phoneNumber.value.trim() || !/^[0-9]{10}$/.test(phoneNumber.value)) {
+    console.log("Số điện thoại không hợp lệ");
     toast.error("Vui lòng nhập số điện thoại hợp lệ (10 chữ số)!");
     return false;
   }
-
-  // Kiểm tra thông tin ngày và buổi tổ chức
   if (!selectedDate.value) {
+    console.log("Ngày tổ chức chưa được chọn");
     toast.error("Vui lòng chọn ngày tổ chức!");
     return false;
   }
   if (!selectedTimeSlot.value) {
+    console.log("Buổi tổ chức chưa được chọn");
     toast.error("Vui lòng chọn buổi tổ chức!");
     return false;
   }
-
-  // Kiểm tra ngày tổ chức hợp lệ (ít nhất 20 ngày từ hôm nay)
-  const currentDate = new Date();
-  const selectedDateObj = new Date(selectedDate.value);
-  const minDate = new Date();
-  minDate.setDate(currentDate.getDate() + 20);
-
-  if (selectedDateObj < minDate) {
-    toast.error("Ngày tổ chức phải cách ít nhất 20 ngày từ hôm nay!");
-    return false;
-  }
-
-  // Kiểm tra số lượng món ăn
   if (selectedMenus.value.length < 3) {
+    console.log("Số lượng món ăn không đủ");
     toast.error("Vui lòng chọn ít nhất 3 món ăn!");
     return false;
   }
 
-  // Kiểm tra sảnh không bị trùng
   try {
     const response = await axios.post("https://localhost:7296/api/invoice/checked", {
       AttendanceDate: selectedDate.value,
       HallId: selectedHallId.value,
       TimeHall: selectedTimeSlot.value,
     });
-
     if (response.status === 400) {
+      console.log("Sảnh đã bị đặt trước");
       toast.error("Sảnh đã được đặt vào thời gian này. Vui lòng chọn sảnh khác!");
       return false;
     }
@@ -360,6 +349,7 @@ const validateOrder = async () => {
     return false;
   }
 
+  console.log("Tất cả điều kiện hợp lệ");
   return true;
 };
 
@@ -417,41 +407,61 @@ const calculateTotalPrice = () => {
   return totalBeforeDiscount - discountedAmount;
 };
 
+
+
 const confirmOrder = async () => {
-  const isValid = await validateOrder(); // Thêm await
-  if (!isValid) {
-    return;
+  const isValid = await validateOrder()
+  if (!isValid) return
+
+  // Lấy userId từ token nếu cần
+  const token = Cookies.get("token_user")
+  let userId = "8951afdf-05b8-41b1-9827-d2cef0a80208"
+  if (token) {
+    try {
+      const decoded = jwt_decode(token) //Giải mã token từ cookie
+      userId = decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"]
+      console.log("UserId decoded từ token:", userId)
+    } catch (e) {
+      console.error("Lỗi decode token:", e)
+    }
+  } else {
+    toast.error("Không tìm thấy token người dùng. Vui lòng đăng nhập lại.")
+    return
   }
 
-  // Tiếp tục xử lý đặt hàng nếu hợp lệ
+  const total = calculateTotalPrice()
+  const totalBefore = total / (1 - discount.value / 100)
+
+  
+  
   const orderData = {
-    branchId: selectedBranchId.value,
-    hallId: selectedHallId.value,
-    menus: selectedMenus.value,
-    services: selectedServices.value,
-    fullName: fullName.value,
-    phoneNumber: phoneNumber.value,
-    note: note.value,
-    date: selectedDate.value,
-    timeSlot: selectedTimeSlot.value,
-    totalPrice: calculateTotalPrice(),
-    promoCode: selectedPromoCode.value?.codeId || null,
-  };
+    UserId: userId,
+    BranchId: selectedBranchId.value,
+    HallId: selectedHallId.value,
+    OrderMenus: selectedMenus.value.map(menuId => ({ MenuID: menuId, Quantity: 1 })),
+    OrderServices: selectedServices.value.map(serviceId => ({ ServiceID: serviceId, Quantity: 1 })),
+    AttendanceDate: new Date(selectedDate.value).toISOString().split("T")[0],
+    TimeHall: selectedTimeSlot.value,
+    FullName: fullName.value,
+    PhoneNumber: phoneNumber.value,
+    Note: note.value || "",
+    InvoiceCodeRequest: selectedPromoCode.value
+      ? [{ CodeId: selectedPromoCode.value.codeId }]
+      : [],
+    Total: total,
+    TotalBeforeDiscount: totalBefore,
+    DepositPayment: total / 2,
+    PaymentWallet: false
+  }
 
   try {
-    const response = await axios.post("https://localhost:7296/api/invoice", orderData);
-    if (response.status === 200) {
-      toast.success("Đơn hàng đã được xác nhận!");
-    } else {
-      toast.error("Xác nhận đơn hàng thất bại!");
-    }
+    const response = await axios.post("https://localhost:7296/api/invoice", orderData)
+    toast.success("Đơn hàng đã được xác nhận!")
   } catch (error) {
-    console.error("Error confirming order:", error);
-    toast.error("Đã xảy ra lỗi khi xác nhận đơn hàng!");
+    console.error("Error confirming order:", error.response?.data || error.message)
+    toast.error(error.response?.data?.message || "Lỗi khi gửi đơn hàng!")
   }
-};
-
-
+}
 
 
 
