@@ -415,18 +415,24 @@ const confirmOrder = async () => {
 
   // Lấy userId từ token nếu cần
   const token = Cookies.get("token_user")
-  let userId = "8951afdf-05b8-41b1-9827-d2cef0a80208"
-  if (token) {
-    try {
-      const decoded = jwt_decode(token) //Giải mã token từ cookie
-      userId = decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"]
-      console.log("UserId decoded từ token:", userId)
-    } catch (e) {
-      console.error("Lỗi decode token:", e)
-    }
-  } else {
-    toast.error("Không tìm thấy token người dùng. Vui lòng đăng nhập lại.")
-    return
+  
+  //Nếu không có token → báo lỗi và dừng lại
+  if (!token) {
+    toast.error("Không tìm thấy token người dùng. Vui lòng đăng nhập lại.");
+    return;
+  }
+
+  let userId
+  try {
+    // Giải mã token
+    const decoded = jwt_decode(token)
+    userId = decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"]
+
+    // Nếu không có userId trong token → báo lỗi
+    if (!userId) throw new Error("Không lấy được userId từ token")
+  } catch (e) {
+    toast.error("Token không hợp lệ. Vui lòng đăng nhập lại.");
+    return;
   }
 
   const total = calculateTotalPrice()
