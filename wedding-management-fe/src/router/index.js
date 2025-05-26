@@ -8,6 +8,7 @@ import ListBranch from '@/components/page/ListBranch/ListBranch.vue'
 import ListMenu from '@/components/page/ListMenu/ListMenu.vue'
 import ListService from '@/components/page/ListService/ListService.vue'
 import Bill from '@/components/page/Bill/Bill.vue'
+import History from '@/components/page/History/History.vue'
 
 
 
@@ -26,6 +27,7 @@ const routes = [
   { path: '/listmenu', name :'ListMenu', component: ListMenu},
   { path: '/listservice', name :'ListService', component: ListService},
   { path: '/bill', name :'Bill', component: Bill},
+  { path: '/history', name :'History', component: History },
 
  
 
