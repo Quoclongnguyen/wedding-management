@@ -74,6 +74,7 @@ const repaymentInvoice = async (invoiceId) => {
       body: JSON.stringify({ invoiceId })
     });
     if (res.ok) {
+      toast.success("Kiểm tra đơn hàng thành công. Chuyển sang cổng thanh toán...");
       demoPayment();
     } else {
       const data = await res.json();
@@ -82,20 +83,31 @@ const repaymentInvoice = async (invoiceId) => {
     }
   } catch (err) {
     console.error('Repayment error:', err);
+    toast.error("Lỗi máy chủ. Vui lòng thử lại sau.");
   }
 };
 
 const demoPayment = async () => {
   try {
     localStorage.removeItem('orderData');
-    const amount = selectedInvoice.value.total - selectedInvoice.value.depositPayment;
-    const response = await fetch(`https://localhost:7296/api/Payment?amount=${amount}00`);
+    const amount = Math.round((selectedInvoice.value.total - selectedInvoice.value.depositPayment) * 100);
+
+    const response = await fetch(`https://localhost:7296/api/Payment?amount=${amount}`);
+    if (!response.ok) throw new Error("Failed to fetch payment URL");
+
     const url = await response.text();
+    if (!url.startsWith("https://")) {
+      toast.error("Đường dẫn thanh toán không hợp lệ.");
+      return;
+    }
+
     window.location.href = url;
   } catch (err) {
     console.error('Payment URL error:', err);
+    toast.error("Không thể tạo đường dẫn thanh toán. Vui lòng thử lại.");
   }
 };
+
 
 const repaymentInvoiceCoin = async (invoiceId) => {
   localStorage.setItem('invoiceId', invoiceId);
@@ -179,6 +191,19 @@ const handleCancelInvoice = () => {
   }
 };
 
+
+const getStatusBadge = (invoice) => {
+  if (invoice.orderStatus === 'Đã hủy đơn hàng') {
+    return { label: 'Đã hủy đơn hàng', class: 'badge bg-danger' };
+  } else if (invoice.orderStatus === 'Hoàn tất thanh toán') {
+    return { label: invoice.paymentCompleteWallet ? '✔ Đã hoàn tất thanh toán bằng ví' : '✔ Đã hoàn tất thanh toán bằng VNPAY', class: 'badge bg-success' };
+  } else if (invoice.orderStatus === 'Đã đặt cọc') {
+    return { label: invoice.paymentWallet ? 'Đã đặt cọc bằng ví' : 'Đã đặt cọc bằng VNPAY', class: 'badge bg-warning text-dark' };
+  } else {
+    return { label: invoice.orderStatus, class: 'badge bg-secondary' };
+  }
+};
+
 const formatPrice = (price) => price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
 const formatDate = (date) => format(new Date(date), 'dd/MM/yyyy');
 </script>
@@ -191,19 +216,27 @@ const formatDate = (date) => format(new Date(date), 'dd/MM/yyyy');
     </div>
 
     
-    <div v-else>
+       <div v-else>
       <div v-if="invoices.length > 0">
-        <div v-for="invoice in invoices" :key="invoice.invoiceID" class="card my-3 p-3" @click="openModal(invoice)">
+        <div v-for="invoice in invoices" :key="invoice.invoiceID" class="card my-4 p-3 position-relative">
+          <div class="position-absolute top-0 end-0 m-2">
+            <span :class="getStatusBadge(invoice).class">{{ getStatusBadge(invoice).label }}</span>
+          </div>
+
           <h5>Mã hóa đơn: {{ invoice.invoiceID }}</h5>
-          <p>Họ tên: {{ invoice.fullName }}</p>
-          <p>SĐT: {{ invoice.phoneNumber }}</p>
-          <p>Chi nhánh: {{ invoice.branch.name }}</p>
-          <p>Sảnh cưới: {{ invoice.hall.name }}</p>
-          <p>Ngày đặt: {{ formatDate(invoice.invoiceDate) }}</p>
-          <p>Ngày tổ chức: {{ formatDate(invoice.attendanceDate) }}</p>
-          <p>Ca: {{ invoice.timeHall }}</p>
-          <p>Tổng tiền: {{ formatPrice(invoice.total) }}</p>
-          <p>Đã cọc: {{ formatPrice(invoice.depositPayment) }}</p>
+          <p><b>Họ tên:</b> {{ invoice.fullName }}</p>
+          <p><b>Số điện thoại:</b> {{ invoice.phoneNumber }}</p>
+          <p><b>Chi nhánh:</b> {{ invoice.branch.name }}</p>
+          <p><b>Sảnh cưới:</b> {{ invoice.hall.name }}</p>
+          <p><b>Thời gian đã đặt:</b> {{ formatDate(invoice.invoiceDate) }}</p>
+          <p><b>Ngày tham dự:</b> {{ formatDate(invoice.attendanceDate) }}</p>
+          <p><b>Ca:</b> {{ invoice.timeHall }}</p>
+          <p><b>Tổng tiền:</b> <span class="text-danger">{{ formatPrice(invoice.total) }}</span></p>
+          <p><b>Đã đặt cọc:</b> <span class="text-danger">{{ formatPrice(invoice.depositPayment) }}</span></p>
+
+          <div class="text-end">
+            <button class="btn btn-outline-primary" @click="openModal(invoice)">Xem chi tiết</button>
+          </div>
         </div>
       </div>
       <p v-else>Không có hóa đơn nào.</p>
