@@ -171,6 +171,14 @@ const paymentCompeleteWallet = () => {
   }, 2000);
 };
 
+const handleCancelInvoice = () => {
+  if (selectedInvoice.value.orderStatus === 'Đã hủy đơn hàng') {
+    window.alert('Đơn đã bị hủy trước đó');
+  } else if (window.confirm('Bạn có chắc chắn muốn hủy đơn hàng này?')) {
+    cancelInvoice(selectedInvoice.value.invoiceID);
+  }
+};
+
 const formatPrice = (price) => price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
 const formatDate = (date) => format(new Date(date), 'dd/MM/yyyy');
 </script>
@@ -182,6 +190,7 @@ const formatDate = (date) => format(new Date(date), 'dd/MM/yyyy');
       <span class="spinner-border"></span>
     </div>
 
+    
     <div v-else>
       <div v-if="invoices.length > 0">
         <div v-for="invoice in invoices" :key="invoice.invoiceID" class="card my-3 p-3" @click="openModal(invoice)">
@@ -240,10 +249,7 @@ const formatDate = (date) => format(new Date(date), 'dd/MM/yyyy');
         </table>
 
         <div class="d-flex justify-content-between">
-          <button class="btn btn-danger" @click="() => {
-            if (selectedInvoice.orderStatus === 'Đã hủy đơn hàng') return alert('Đơn đã bị hủy');
-            if (confirm('Bạn có chắc muốn hủy đơn?')) cancelInvoice(selectedInvoice.invoiceID);
-          }">Hủy đơn</button>
+          <button class="btn btn-danger" @click="handleCancelInvoice">Hủy đơn</button>
 
           <div>
             <button class="btn btn-secondary me-2" @click="() => repaymentInvoiceCoin(selectedInvoice.invoiceID)" :disabled="selectedInvoice.paymentStatus">
