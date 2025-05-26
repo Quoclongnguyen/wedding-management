@@ -1,0 +1,296 @@
+<script setup>
+import { ref, onMounted, computed } from 'vue';
+import { useToast } from 'vue-toastification';
+import Cookies from 'js-cookie';
+import jwt_decode from 'jwt-decode';
+import { format } from 'date-fns';
+
+const toast = useToast();
+const invoices = ref([]);
+const loading = ref(true);
+const selectedInvoice = ref(null);
+const showModal = ref(false);
+const showModalPaymentWallet = ref(false);
+const isProcessingPaymentWallet = ref(false);
+const wallet = ref(null);
+const paymentCoin = ref('');
+
+let id = null;
+const tokenFromCookie = Cookies.get('token_user');
+if (tokenFromCookie) {
+  const decodedToken = jwt_decode(tokenFromCookie);
+  id = decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'];
+}
+
+const fetchInvoicesByUser = async () => {
+  loading.value = true;
+  try {
+    const res = await fetch(`https://localhost:7296/api/invoice/get-invoice/${id}`);
+    const data = await res.json();
+    invoices.value = data.sort((a, b) => new Date(b.invoiceDate) - new Date(a.invoiceDate));
+  } catch (err) {
+    console.error('Lỗi lấy đơn hàng:', err);
+  } finally {
+    loading.value = false;
+  }
+};
+
+onMounted(fetchInvoicesByUser);
+
+const openModal = (invoice) => {
+  selectedInvoice.value = invoice;
+  showModal.value = true;
+};
+
+const closeModal = () => {
+  showModal.value = false;
+};
+
+const cancelInvoice = async (invoiceId) => {
+  try {
+    const res = await fetch(`https://localhost:7296/api/invoice/cancel/${invoiceId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ invoiceId })
+    });
+    if (res.ok) {
+      invoices.value = invoices.value.map(i => i.invoiceID === invoiceId ? { ...i, orderStatus: 'Đã hủy đơn hàng' } : i);
+      toast.success('Đã hủy đơn hàng thành công');
+      closeModal();
+    } else {
+      toast.error('Lỗi khi hủy đơn hàng');
+    }
+  } catch (e) {
+    console.error('Cancel error:', e);
+  }
+};
+
+const repaymentInvoice = async (invoiceId) => {
+  localStorage.setItem('invoiceId', invoiceId);
+  try {
+    const res = await fetch(`https://localhost:7296/api/invoice/check-repayment/${invoiceId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ invoiceId })
+    });
+    if (res.ok) {
+      demoPayment();
+    } else {
+      const data = await res.json();
+      toast.error(data.message);
+      localStorage.removeItem('invoiceId');
+    }
+  } catch (err) {
+    console.error('Repayment error:', err);
+  }
+};
+
+const demoPayment = async () => {
+  try {
+    localStorage.removeItem('orderData');
+    const amount = selectedInvoice.value.total - selectedInvoice.value.depositPayment;
+    const response = await fetch(`https://localhost:7296/api/Payment?amount=${amount}00`);
+    const url = await response.text();
+    window.location.href = url;
+  } catch (err) {
+    console.error('Payment URL error:', err);
+  }
+};
+
+const repaymentInvoiceCoin = async (invoiceId) => {
+  localStorage.setItem('invoiceId', invoiceId);
+  try {
+    const res = await fetch(`https://localhost:7296/api/invoice/check-repayment/${invoiceId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ invoiceId })
+    });
+    if (res.ok) {
+      openModalPaymentCoin();
+    } else {
+      const data = await res.json();
+      toast.error(data.message);
+      localStorage.removeItem('invoiceId');
+    }
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+const openModalPaymentCoin = async () => {
+  await fetchWallet();
+  afterPaymentCoint();
+  closeModal();
+  showModalPaymentWallet.value = true;
+};
+
+const closeModalPaymentCoin = () => {
+  afterPaymentCoint();
+  fetchWallet();
+  showModalPaymentWallet.value = false;
+};
+
+const fetchWallet = async () => {
+  try {
+    const res = await fetch(`https://localhost:7296/api/wallet/${id}`);
+    wallet.value = await res.json();
+  } catch (e) {
+    console.error('Wallet fetch error:', e);
+  }
+};
+
+const afterPaymentCoint = () => {
+  const coin = wallet.value?.coin || 0;
+  const need = selectedInvoice.value.total / 2;
+  paymentCoin.value = coin >= need ? coin - need : 'Không đủ số dư';
+};
+
+const paymentCompeleteWallet = () => {
+  isProcessingPaymentWallet.value = true;
+  setTimeout(async () => {
+    const invoiceId = localStorage.getItem('invoiceId');
+    try {
+      const res = await fetch(`https://localhost:7296/api/invoice/repayment-compelete-wallet/${invoiceId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(invoiceId)
+      });
+      if (res.ok) {
+        toast.success('Thanh toán thành công bằng ví');
+        closeModalPaymentCoin();
+        fetchInvoicesByUser();
+        localStorage.removeItem('invoiceId');
+      } else {
+        toast.error('Thanh toán thất bại. Vui lòng thử lại.');
+      }
+    } catch (e) {
+      console.error('Wallet pay error:', e);
+    } finally {
+      isProcessingPaymentWallet.value = false;
+    }
+  }, 2000);
+};
+
+const formatPrice = (price) => price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
+const formatDate = (date) => format(new Date(date), 'dd/MM/yyyy');
+</script>
+<template>
+  <div class="history-container">
+    <h1>Lịch sử đặt nhà hàng</h1>
+
+    <div v-if="loading" class="text-center py-4">
+      <span class="spinner-border"></span>
+    </div>
+
+    <div v-else>
+      <div v-if="invoices.length > 0">
+        <div v-for="invoice in invoices" :key="invoice.invoiceID" class="card my-3 p-3" @click="openModal(invoice)">
+          <h5>Mã hóa đơn: {{ invoice.invoiceID }}</h5>
+          <p>Họ tên: {{ invoice.fullName }}</p>
+          <p>SĐT: {{ invoice.phoneNumber }}</p>
+          <p>Chi nhánh: {{ invoice.branch.name }}</p>
+          <p>Sảnh cưới: {{ invoice.hall.name }}</p>
+          <p>Ngày đặt: {{ formatDate(invoice.invoiceDate) }}</p>
+          <p>Ngày tổ chức: {{ formatDate(invoice.attendanceDate) }}</p>
+          <p>Ca: {{ invoice.timeHall }}</p>
+          <p>Tổng tiền: {{ formatPrice(invoice.total) }}</p>
+          <p>Đã cọc: {{ formatPrice(invoice.depositPayment) }}</p>
+        </div>
+      </div>
+      <p v-else>Không có hóa đơn nào.</p>
+    </div>
+
+    <!-- Modal Chi tiết hóa đơn -->
+    <b-modal v-model="showModal" title="Chi tiết hóa đơn" size="xl" hide-footer>
+      <template v-if="selectedInvoice">
+        <h5>Mã hóa đơn: {{ selectedInvoice.invoiceID }}</h5>
+        <p>Họ tên: {{ selectedInvoice.fullName }}</p>
+        <p>SĐT: {{ selectedInvoice.phoneNumber }}</p>
+        <p>Chi nhánh: {{ selectedInvoice.branch.name }}</p>
+        <p>Sảnh cưới: {{ selectedInvoice.hall.name }}</p>
+        <p>Ngày đặt: {{ formatDate(selectedInvoice.invoiceDate) }}</p>
+        <p>Ngày tổ chức: {{ formatDate(selectedInvoice.attendanceDate) }}</p>
+
+        <h5>Danh sách thực đơn</h5>
+        <table class="table table-bordered">
+          <thead>
+            <tr><th>Hình</th><th>Tên</th><th>Giá</th></tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in selectedInvoice.orderMenus" :key="item.orderMenuId">
+              <td><img :src="item.menuEntity.image" style="width:100px; height:100px; object-fit:cover" /></td>
+              <td>{{ item.menuEntity.name }}</td>
+              <td>{{ formatPrice(item.menuEntity.price) }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h5>Danh sách dịch vụ</h5>
+        <table class="table table-bordered">
+          <thead>
+            <tr><th>Hình</th><th>Tên</th><th>Giá</th></tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in selectedInvoice.orderServices" :key="item.orderServiceId">
+              <td><img :src="item.serviceEntity.image" style="width:100px; height:100px; object-fit:cover" /></td>
+              <td>{{ item.serviceEntity.name }}</td>
+              <td>{{ formatPrice(item.serviceEntity.price) }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="d-flex justify-content-between">
+          <button class="btn btn-danger" @click="() => {
+            if (selectedInvoice.orderStatus === 'Đã hủy đơn hàng') return alert('Đơn đã bị hủy');
+            if (confirm('Bạn có chắc muốn hủy đơn?')) cancelInvoice(selectedInvoice.invoiceID);
+          }">Hủy đơn</button>
+
+          <div>
+            <button class="btn btn-secondary me-2" @click="() => repaymentInvoiceCoin(selectedInvoice.invoiceID)" :disabled="selectedInvoice.paymentStatus">
+              Thanh toán ví Coin
+            </button>
+            <button class="btn btn-success" @click="() => repaymentInvoice(selectedInvoice.invoiceID)" :disabled="selectedInvoice.paymentStatus">
+              Thanh toán VNPAY
+            </button>
+          </div>
+        </div>
+      </template>
+    </b-modal>
+
+    <!-- Modal Thanh toán bằng ví -->
+    <b-modal v-model="showModalPaymentWallet" title="Thanh toán bằng ví" hide-footer>
+      <template v-if="wallet">
+        <p>Số dư hiện tại: <b class="text-danger">{{ formatPrice(wallet.coin) }}</b></p>
+        <p>Giá trị cần thanh toán: {{ formatPrice(selectedInvoice.total / 2) }}</p>
+        <p>Số dư sau thanh toán: <span v-if="typeof paymentCoin === 'number'">{{ formatPrice(paymentCoin) }}</span><span v-else class="text-danger">{{ paymentCoin }}</span></p>
+
+        <div class="d-flex justify-content-end">
+          <button class="btn btn-secondary me-2" @click="closeModalPaymentCoin">Đóng</button>
+          <button class="btn btn-primary" @click="paymentCompeleteWallet" :disabled="isProcessingPaymentWallet">
+            <span v-if="isProcessingPaymentWallet" class="spinner-border spinner-border-sm me-2"></span>
+            Xác nhận thanh toán
+          </button>
+        </div>
+      </template>
+      <template v-else>
+        <p class="text-danger">Không thể lấy thông tin ví.</p>
+      </template>
+    </b-modal>
+  </div>
+</template>
+
+
+<style scoped>
+.history-container {
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
+}
+.card {
+  cursor: pointer;
+  transition: box-shadow 0.3s;
+}
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+</style>
