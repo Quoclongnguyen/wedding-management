@@ -145,11 +145,20 @@ const closeModalPaymentCoin = () => {
 const fetchWallet = async () => {
   try {
     const res = await fetch(`https://localhost:7296/api/wallet/${id}`);
-    wallet.value = await res.json();
+    
+    if (!res.ok) {
+      throw new Error(`Lỗi HTTP: ${res.status}`);
+    }
+
+    const data = await res.json();
+    wallet.value = data;
   } catch (e) {
     console.error('Wallet fetch error:', e);
+    toast.error("Không thể lấy thông tin ví.");
+    wallet.value = null;
   }
 };
+
 
 const afterPaymentCoint = () => {
   const coin = wallet.value?.coin || 0;
@@ -193,16 +202,38 @@ const handleCancelInvoice = () => {
 
 
 const getStatusBadge = (invoice) => {
+  // Đơn hàng đã hủy
   if (invoice.orderStatus === 'Đã hủy đơn hàng') {
     return { label: 'Đã hủy đơn hàng', class: 'badge bg-danger' };
-  } else if (invoice.orderStatus === 'Hoàn tất thanh toán') {
-    return { label: invoice.paymentCompleteWallet ? '✔ Đã hoàn tất thanh toán bằng ví' : '✔ Đã hoàn tất thanh toán bằng VNPAY', class: 'badge bg-success' };
-  } else if (invoice.orderStatus === 'Đã đặt cọc') {
-    return { label: invoice.paymentWallet ? 'Đã đặt cọc bằng ví' : 'Đã đặt cọc bằng VNPAY', class: 'badge bg-warning text-dark' };
-  } else {
-    return { label: invoice.orderStatus, class: 'badge bg-secondary' };
   }
+
+  // Đơn đã hoàn tất thanh toán
+  if (invoice.orderStatus === 'Hoàn tất thanh toán' || invoice.paymentStatus) {
+    return {
+      label: invoice.paymentCompleteWallet
+        ? 'Đã hoàn tất thanh toán bằng ví'
+        : 'Đã hoàn tất thanh toán bằng VNPAY',
+      class: 'badge bg-success',
+    };
+  }
+
+  // Đơn đã đặt cọc nhưng chưa thanh toán hết
+  if (invoice.orderStatus === 'Đã đặt cọc') {
+    return {
+      label: invoice.paymentWallet
+        ? 'Đã đặt cọc bằng ví'
+        : 'Đã đặt cọc bằng VNPAY',
+      class: 'badge bg-warning text-dark',
+    };
+  }
+
+  // Các trạng thái khác
+  return {
+    label: invoice.orderStatus || 'Không xác định',
+    class: 'badge bg-secondary',
+  };
 };
+
 
 const formatPrice = (price) => price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
 const formatDate = (date) => format(new Date(date), 'dd/MM/yyyy');

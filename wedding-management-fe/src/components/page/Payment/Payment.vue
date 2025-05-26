@@ -48,16 +48,12 @@ const paymentComplete = async () => {
     const invoiceId = JSON.parse(storedInvoiceId);
 
     try {
-      const response = await fetch(
-        `https://localhost:7296/api/invoice/repayment-compelete/${invoiceId}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ invoiceId }),
-        }
-      );
+            const response = await fetch(`https://localhost:7296/api/invoice/repayment-compelete/${invoiceId}`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+            });
 
       if (!response.ok) throw new Error("Failed to complete payment");
 
@@ -66,13 +62,11 @@ const paymentComplete = async () => {
       orderSent.value = true;
       loading.value = false;
       localStorage.removeItem("invoiceId");
-      toast.success("Thanh toán VNPAY thành công!");
     } catch (err) {
       console.error("Lỗi khi gửi đơn hàng:", err);
       loading.value = false;
       error.value = true;
       localStorage.removeItem("invoiceId");
-      toast.error("Thanh toán thất bại");
     }
   } else {
     console.error("Không có dữ liệu đơn hàng trong localStorage");
@@ -103,13 +97,11 @@ const sendOrderData = async () => {
       orderSent.value = true;
       loading.value = false;
       localStorage.removeItem("orderData");
-      toast.success("Đặt cọc thành công!");
     } catch (err) {
       console.error("Lỗi khi gửi đơn hàng:", err);
       loading.value = false;
       error.value = true;
       localStorage.removeItem("orderData");
-      toast.error("Đặt đơn thất bại");
     }
   } else {
     console.error("Không có dữ liệu đơn hàng trong localStorage");

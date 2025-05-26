@@ -14,6 +14,7 @@
     width: 100%;
     max-width: 500px;
     text-align: center;
+    animation: fadeIn 0.4s ease forwards; /* thêm hiệu ứng */
     transition: all 0.3s ease;
 
     &:hover {
@@ -140,6 +141,9 @@
     }
   }
 }
+
+
+
 
 @media (max-width: 576px) {
   .payment-container {

@@ -1,3 +1,4 @@
+
 <template>
   <div v-if="loading" class="overlay">
     <div class="spinner"></div>
@@ -5,16 +6,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-
-const loading = ref(true)
-
-onMounted(() => {
-  // Giả lập trạng thái loading trong 3 giây
-  setTimeout(() => {
-    loading.value = false
-  }, 3000)
-})
+defineProps({
+  loading: Boolean
+});
 </script>
 
 <style scoped>
@@ -35,7 +29,7 @@ onMounted(() => {
   width: 40px;
   height: 40px;
   border: 5px solid rgba(0, 0, 0, 0.1);
-  border-top-color: #fe8e5c; /* Màu sắc spinner */
+  border-top-color: #fe8e5c;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
