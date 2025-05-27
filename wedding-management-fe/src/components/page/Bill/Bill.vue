@@ -147,7 +147,7 @@
                 </div>
                 <p v-if="discount > 0" class="mt-3">
                   Đã áp dụng mã giảm giá: <strong>{{ selectedPromoCode.codeName }}</strong> - Giảm <strong>{{ discount
-                    }}%</strong>
+                  }}%</strong>
                 </p>
               </Accordion.Body>
             </Accordion.Item>
@@ -177,8 +177,68 @@
                     Xác Nhận Đơn Hàng
                   </button>
                 </div>
+
               </Accordion.Body>
             </Accordion.Item>
+            <!-- Nút gọi mở modal chi tiết đơn hàng -->
+            <button type="button" class="btn btn-info mt-4"
+              style="position: fixed; bottom: 90px; right: 0; z-index: 1000" @click="toggleOrderModal">
+              <i class="fas fa-shopping-cart" style="margin-right: 8px;"></i> Xem Đơn Hàng
+            </button>
+
+            <!-- Hiển thị Modal xem chi tiết đơn hàng -->
+            <Modal v-if="showOrderModal" @close="toggleOrderModal">
+              <template #header>
+                <h3 >Chi Tiết Đơn Hàng</h3>
+              </template>
+              <template #body>
+                <div>
+                  <!-- Chi Nhánh -->
+                  <h5>Chi nhánh đã chọn</h5>
+                  <div v-if="selectedBranchId">
+                    <img :src="branchs.find(branch => branch.branchId === selectedBranchId)?.image || ''"
+                      alt="Branch Image" style="width: 100%; height: auto; border-radius: 8px; margin-bottom: 10px;" />
+                    <p>{{branchs.find(branch => branch.branchId === selectedBranchId)?.name || 'Chưa chọn'}}</p>
+                  </div>
+
+                  <!-- Sảnh Cưới -->
+                  <h5>Sảnh cưới đã chọn</h5>
+                  <div v-if="selectedHallId">
+                    <img :src="hallsByBranch.find(hall => hall.hallId === selectedHallId)?.image || ''" alt="Hall Image"
+                      style="width: 100%; height: auto; border-radius: 8px; margin-bottom: 10px;" />
+                    <p>{{hallsByBranch.find(hall => hall.hallId === selectedHallId)?.name || 'Chưa chọn'}}</p>
+                    <p>Giá: {{formatPrice(hallsByBranch.find(hall => hall.hallId === selectedHallId)?.price || 0)}}
+                    </p>
+                  </div>
+
+                  <!-- Thực Đơn -->
+                  <h5>Danh sách món ăn đã chọn</h5>
+                  <div v-for="menuId in selectedMenus" :key="menuId" style="margin-bottom: 10px;">
+                    <img :src="menus.find(menu => menu.menuId === menuId)?.image || ''" alt="Menu Image"
+                      style="width: 100%; height: auto; border-radius: 8px; margin-bottom: 5px;" />
+                    <p>{{menus.find(menu => menu.menuId === menuId)?.name || 'Không xác định'}}</p>
+                    <p>Giá: {{formatPrice(menus.find(menu => menu.menuId === menuId)?.price || 0)}}</p>
+                  </div>
+
+                  <!-- Dịch Vụ -->
+                  <h5>Danh sách dịch vụ đã chọn</h5>
+                  <div v-for="serviceId in selectedServices" :key="serviceId" style="margin-bottom: 10px;">
+                    <img :src="services.find(service => service.serviceId === serviceId)?.image || ''"
+                      alt="Service Image" style="width: 100%; height: auto; border-radius: 8px; margin-bottom: 5px;" />
+                    <p>{{services.find(service => service.serviceId === serviceId)?.name || 'Không xác định'}}</p>
+                    <p>Giá: {{formatPrice(services.find(service => service.serviceId === serviceId)?.price || 0)}}</p>
+                  </div>
+
+                  <!-- Tổng Tiền -->
+                  <h3>Tổng Tiền</h3>
+                  <p>{{ formatPrice(calculateTotalPrice()) }}</p>
+                </div>
+              </template>
+              <template #footer>
+                <button class="btn btn-secondary" @click="toggleOrderModal">Đóng</button>
+              </template>
+            </Modal>
+
           </Accordion>
         </form>
       </div>
@@ -194,6 +254,9 @@ import { useToast } from "vue-toastification";
 import axios from "axios";
 import Cookies from "js-cookie";
 import jwt_decode from "jwt-decode";
+
+
+import Modal from '@/components/common/Modal.vue'; // Đường dẫn tùy thuộc vào vị trí file Modal
 // State
 const branchs = ref([]);
 const selectedBranchId = ref(null);
@@ -217,6 +280,9 @@ const timeSlots = ref(["Sáng", "Chiều", "Tối"]); // Các buổi tổ chức
 const promoCodes = ref([]); // Danh sách mã giảm giá
 const selectedPromoCode = ref(null); // Mã giảm giá đã chọn
 const discount = ref(0); // Giá trị giảm giá
+
+
+const showOrderModal = ref(false); // Trạng thái điều khiển modal
 
 // Toast thông báo
 const toast = useToast();
@@ -415,7 +481,7 @@ const confirmOrder = async () => {
 
   // Lấy userId từ token nếu cần
   const token = Cookies.get("token_user")
-  
+
   //Nếu không có token → báo lỗi và dừng lại
   if (!token) {
     toast.error("Không tìm thấy token người dùng. Vui lòng đăng nhập lại.");
@@ -438,8 +504,8 @@ const confirmOrder = async () => {
   const total = calculateTotalPrice()
   const totalBefore = total / (1 - discount.value / 100)
 
-  
-  
+
+
   const orderData = {
     UserId: userId,
     BranchId: selectedBranchId.value,
@@ -468,6 +534,12 @@ const confirmOrder = async () => {
     toast.error(error.response?.data?.message || "Lỗi khi gửi đơn hàng!")
   }
 }
+
+
+const toggleOrderModal = () => {
+  showOrderModal.value = !showOrderModal.value;
+};
+
 
 
 
