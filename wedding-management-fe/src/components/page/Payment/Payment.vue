@@ -12,6 +12,7 @@
         </div>
         <h2>Thanh toán thất bại</h2>
         <p>Đã xảy ra lỗi trong quá trình xử lý. Vui lòng thử lại sau.</p>
+        <p class="error-details">Nếu vấn đề vẫn tiếp diễn, vui lòng liên hệ bộ phận hỗ trợ khách hàng.</p>
         <button class="retry-button" @click="retryPayment">Thử lại</button>
       </div>
       <div v-else class="success-state">
@@ -31,6 +32,7 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
+import { useRoute } from 'vue-router';
 import { useToast } from "vue-toastification";
 import LoadingOverlay from "@/components/Context/LoadingOverlay.vue";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
@@ -40,92 +42,85 @@ const loading = ref(true);
 const error = ref(false);
 const orderSent = ref(false);
 const toast = useToast();
+const route = useRoute();
 
-const paymentComplete = async () => {
-  const storedInvoiceId = localStorage.getItem("invoiceId");
+const paymentComplete = async (invoiceId) => {
+  try {
+    console.log(" Gọi API hoàn tất thanh toán với invoiceId:", invoiceId);
 
-  if (storedInvoiceId) {
-    const invoiceId = JSON.parse(storedInvoiceId);
+    const response = await fetch(`https://localhost:7296/api/invoice/repayment-compelete/${invoiceId}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
-    try {
-            const response = await fetch(`https://localhost:7296/api/invoice/repayment-compelete/${invoiceId}`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-            });
+    const data = await response.json();
+    console.log(" Phản hồi từ server:", data);
 
-      if (!response.ok) throw new Error("Failed to complete payment");
-
-      const data = await response.json();
-      console.log("Đã gửi đơn hàng thành công:", data);
-      orderSent.value = true;
-      loading.value = false;
-      localStorage.removeItem("invoiceId");
-    } catch (err) {
-      console.error("Lỗi khi gửi đơn hàng:", err);
-      loading.value = false;
-      error.value = true;
-      localStorage.removeItem("invoiceId");
+    if (!response.ok || data.message?.includes("hủy")) {
+      // Nếu server trả về thông báo lỗi hoặc đơn hàng đã bị hủy
+      throw new Error(data.message || "Không thể xác nhận thanh toán");
     }
-  } else {
-    console.error("Không có dữ liệu đơn hàng trong localStorage");
-    loading.value = false;
+
+    // Thành công
+    orderSent.value = true;
+    toast.success("Đơn hàng đã được xác nhận thanh toán!");
+  } catch (err) {
+    console.error(" Lỗi khi hoàn tất thanh toán:", err);
+    toast.error(err.message || "Thanh toán thất bại. Vui lòng thử lại.");
     error.value = true;
+  } finally {
+    loading.value = false;
+    localStorage.removeItem("invoiceId");
+    localStorage.removeItem("orderData");
   }
 };
 
-const sendOrderData = async () => {
-  const storedOrderData = localStorage.getItem("orderData");
-
-  if (storedOrderData) {
-    const orderData = JSON.parse(storedOrderData);
-
-    try {
-      const response = await fetch("https://localhost:7296/api/invoice", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(orderData),
-      });
-
-      if (!response.ok) throw new Error("Failed to send order data");
-
-      const data = await response.json();
-      console.log("Đã gửi đơn hàng thành công:", data);
-      orderSent.value = true;
-      loading.value = false;
-      localStorage.removeItem("orderData");
-    } catch (err) {
-      console.error("Lỗi khi gửi đơn hàng:", err);
-      loading.value = false;
-      error.value = true;
-      localStorage.removeItem("orderData");
-    }
-  } else {
-    console.error("Không có dữ liệu đơn hàng trong localStorage");
-    loading.value = false;
-    error.value = true;
-  }
-};
-
-const retryPayment = () => {
-  window.location.href = "/bill";
-};
-
-const navigateTo = (path) => {
-  window.location.href = path;
-};
+const retryPayment = () => window.location.href = "/bill";
+const navigateTo = (path) => window.location.href = path;
 
 onMounted(() => {
-  if (!orderSent.value) {
-    const storedInvoiceId = localStorage.getItem("invoiceId");
-    if (storedInvoiceId != null) {
-      paymentComplete();
+  const status = route.query.status;
+  const invoiceIdRaw = route.query.invoiceId;
+
+  console.log(" Trạng thái từ URL:", status);
+  console.log(" invoiceIdRaw:", invoiceIdRaw);
+
+  if (status === "fail") {
+    error.value = true;
+    loading.value = false;
+    return;
+  }
+
+  if (status === "success" && invoiceIdRaw) {
+    const invoiceId = parseInt(invoiceIdRaw);
+    if (!isNaN(invoiceId)) {
+      console.log("👉 Gọi xử lý thanh toán sau callback VNPAY...");
+      paymentComplete(invoiceId);
     } else {
-      sendOrderData();
+      console.error(" invoiceId không hợp lệ từ URL");
+      error.value = true;
+      loading.value = false;
     }
+    return;
+  }
+
+  const storedInvoiceId = localStorage.getItem("invoiceId");
+  if (storedInvoiceId) {
+    try {
+      const invoiceId = JSON.parse(storedInvoiceId);
+      console.log(" Gọi lại API từ localStorage...");
+      paymentComplete(invoiceId);
+    } catch (e) {
+      console.error(" Không đọc được invoiceId từ localStorage:", e);
+      error.value = true;
+      loading.value = false;
+    }
+  } else {
+    console.error(" Không có invoiceId, không thể xử lý.");
+    error.value = true;
+    loading.value = false;
   }
 });
 </script>

@@ -66,7 +66,7 @@ const cancelInvoice = async (invoiceId) => {
 };
 
 const repaymentInvoice = async (invoiceId) => {
-  localStorage.setItem('invoiceId', invoiceId);
+  localStorage.setItem('invoiceId', invoiceId); // Lưu invoiceId vào localStorage để dùng lại sau redirect
   try {
     const res = await fetch(`https://localhost:7296/api/invoice/check-repayment/${invoiceId}`, {
       method: 'POST',
@@ -75,7 +75,7 @@ const repaymentInvoice = async (invoiceId) => {
     });
     if (res.ok) {
       toast.success("Kiểm tra đơn hàng thành công. Chuyển sang cổng thanh toán...");
-      demoPayment();
+      demoPayment(); // GỌI HÀM demoPayment() → Chuyển đến VNPAY
     } else {
       const data = await res.json();
       toast.error(data.message);
@@ -87,26 +87,61 @@ const repaymentInvoice = async (invoiceId) => {
   }
 };
 
+
 const demoPayment = async () => {
   try {
-    localStorage.removeItem('orderData');
-    const amount = Math.round((selectedInvoice.value.total - selectedInvoice.value.depositPayment) * 100);
+    localStorage.removeItem('orderData'); // Dọn dữ liệu đơn hàng cũ nếu có
 
-    const response = await fetch(`https://localhost:7296/api/Payment?amount=${amount}`);
-    if (!response.ok) throw new Error("Failed to fetch payment URL");
+    //  Kiểm tra hóa đơn đầu vào
+    if (!selectedInvoice.value || typeof selectedInvoice.value.invoiceID !== 'number') {
+      toast.error("Không tìm thấy hóa đơn để thanh toán.");
+      return;
+    }
+
+    const invoiceId = selectedInvoice.value.invoiceID;
+    const total = parseFloat(selectedInvoice.value.total || 0);
+    const deposit = parseFloat(selectedInvoice.value.depositPayment || 0);
+    const amount = Math.floor(total - deposit); // ✅ dùng Math.floor để tránh số lẻ
+
+    //  Log để kiểm tra
+    console.log("===> InvoiceID:", invoiceId);
+    console.log("===> Tổng tiền:", total);
+    console.log("===> Đã đặt cọc:", deposit);
+    console.log("===> Số tiền gửi lên BE (amount):", amount);
+
+    //  VNPAY yêu cầu >= 5.000 VND và là số nguyên
+    if (isNaN(amount) || amount < 5000) {
+      toast.error("Số tiền cần thanh toán phải từ 5.000 VND trở lên.");
+      return;
+    }
+
+    //  Gọi backend lấy URL VNPAY
+    const response = await fetch(`https://localhost:7296/api/payment/get-payment-url?invoiceId=${invoiceId}&amount=${amount}`);
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error(" Gọi API thanh toán thất bại:", errText);
+      throw new Error("Failed to fetch payment URL");
+    }
 
     const url = await response.text();
+
     if (!url.startsWith("https://")) {
       toast.error("Đường dẫn thanh toán không hợp lệ.");
       return;
     }
 
+    //  Điều hướng sang VNPAY
     window.location.href = url;
   } catch (err) {
-    console.error('Payment URL error:', err);
+    console.error(' Payment URL error:', err);
     toast.error("Không thể tạo đường dẫn thanh toán. Vui lòng thử lại.");
   }
 };
+
+
+
+
+
 
 
 const repaymentInvoiceCoin = async (invoiceId) => {
@@ -118,7 +153,7 @@ const repaymentInvoiceCoin = async (invoiceId) => {
       body: JSON.stringify({ invoiceId })
     });
     if (res.ok) {
-      openModalPaymentCoin();
+      openModalPaymentCoin(); // Hiện modal xác nhận thanh toán ví
     } else {
       const data = await res.json();
       toast.error(data.message);
@@ -145,7 +180,7 @@ const closeModalPaymentCoin = () => {
 const fetchWallet = async () => {
   try {
     const res = await fetch(`https://localhost:7296/api/wallet/${id}`);
-    
+
     if (!res.ok) {
       throw new Error(`Lỗi HTTP: ${res.status}`);
     }
@@ -173,13 +208,11 @@ const paymentCompeleteWallet = () => {
     try {
       const res = await fetch(`https://localhost:7296/api/invoice/repayment-compelete-wallet/${invoiceId}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(invoiceId)
       });
       if (res.ok) {
-        toast.success('Thanh toán thành công bằng ví');
-        closeModalPaymentCoin();
-        fetchInvoicesByUser();
+        toast.success('Đơn hàng đã được thanh toán thành công bằng ví!');
+        closeModalPaymentCoin(); // Đóng modal
+        fetchInvoicesByUser();   //  Làm mới dữ liệu
         localStorage.removeItem('invoiceId');
       } else {
         toast.error('Thanh toán thất bại. Vui lòng thử lại.');
@@ -246,8 +279,8 @@ const formatDate = (date) => format(new Date(date), 'dd/MM/yyyy');
       <span class="spinner-border"></span>
     </div>
 
-    
-       <div v-else>
+
+    <div v-else>
       <div v-if="invoices.length > 0">
         <div v-for="invoice in invoices" :key="invoice.invoiceID" class="card my-4 p-3 position-relative">
           <div class="position-absolute top-0 end-0 m-2">
@@ -287,7 +320,11 @@ const formatDate = (date) => format(new Date(date), 'dd/MM/yyyy');
         <h5>Danh sách thực đơn</h5>
         <table class="table table-bordered">
           <thead>
-            <tr><th>Hình</th><th>Tên</th><th>Giá</th></tr>
+            <tr>
+              <th>Hình</th>
+              <th>Tên</th>
+              <th>Giá</th>
+            </tr>
           </thead>
           <tbody>
             <tr v-for="item in selectedInvoice.orderMenus" :key="item.orderMenuId">
@@ -301,7 +338,11 @@ const formatDate = (date) => format(new Date(date), 'dd/MM/yyyy');
         <h5>Danh sách dịch vụ</h5>
         <table class="table table-bordered">
           <thead>
-            <tr><th>Hình</th><th>Tên</th><th>Giá</th></tr>
+            <tr>
+              <th>Hình</th>
+              <th>Tên</th>
+              <th>Giá</th>
+            </tr>
           </thead>
           <tbody>
             <tr v-for="item in selectedInvoice.orderServices" :key="item.orderServiceId">
@@ -316,10 +357,12 @@ const formatDate = (date) => format(new Date(date), 'dd/MM/yyyy');
           <button class="btn btn-danger" @click="handleCancelInvoice">Hủy đơn</button>
 
           <div>
-            <button class="btn btn-secondary me-2" @click="() => repaymentInvoiceCoin(selectedInvoice.invoiceID)" :disabled="selectedInvoice.paymentStatus">
+            <button class="btn btn-secondary me-2" @click="() => repaymentInvoiceCoin(selectedInvoice.invoiceID)"
+              :disabled="selectedInvoice.paymentStatus">
               Thanh toán ví Coin
             </button>
-            <button class="btn btn-success" @click="() => repaymentInvoice(selectedInvoice.invoiceID)" :disabled="selectedInvoice.paymentStatus">
+            <button class="btn btn-success" @click="() => repaymentInvoice(selectedInvoice.invoiceID)"
+              :disabled="selectedInvoice.paymentStatus">
               Thanh toán VNPAY
             </button>
           </div>
@@ -332,7 +375,8 @@ const formatDate = (date) => format(new Date(date), 'dd/MM/yyyy');
       <template v-if="wallet">
         <p>Số dư hiện tại: <b class="text-danger">{{ formatPrice(wallet.coin) }}</b></p>
         <p>Giá trị cần thanh toán: {{ formatPrice(selectedInvoice.total / 2) }}</p>
-        <p>Số dư sau thanh toán: <span v-if="typeof paymentCoin === 'number'">{{ formatPrice(paymentCoin) }}</span><span v-else class="text-danger">{{ paymentCoin }}</span></p>
+        <p>Số dư sau thanh toán: <span v-if="typeof paymentCoin === 'number'">{{ formatPrice(paymentCoin) }}</span><span
+            v-else class="text-danger">{{ paymentCoin }}</span></p>
 
         <div class="d-flex justify-content-end">
           <button class="btn btn-secondary me-2" @click="closeModalPaymentCoin">Đóng</button>
@@ -356,10 +400,12 @@ const formatDate = (date) => format(new Date(date), 'dd/MM/yyyy');
   margin: auto;
   padding: 20px;
 }
+
 .card {
   cursor: pointer;
   transition: box-shadow 0.3s;
 }
+
 .card:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
