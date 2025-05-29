@@ -147,44 +147,68 @@
                 </div>
                 <p v-if="discount > 0" class="mt-3">
                   Đã áp dụng mã giảm giá: <strong>{{ selectedPromoCode.codeName }}</strong> - Giảm <strong>{{ discount
-                    }}%</strong>
+                  }}%</strong>
                 </p>
               </Accordion.Body>
             </Accordion.Item>
 
-            <Accordion.Item eventKey="7">
-              <Accordion.Header>Kiểm Tra và Xác Nhận Đơn Hàng</Accordion.Header>
-              <Accordion.Body class="body">
-                <div class="order-review">
-                  <h5>Chi Nhánh: {{branchs.find(branch => branch.branchId === selectedBranchId)?.name || "Chưa chọn"}}
-                  </h5>
-                  <h5>Sảnh Cưới: {{hallsByBranch.find(hall => hall.hallId === selectedHallId)?.name || "Chưa chọn"}}
-                  </h5>
-                  <h5>Thực Đơn:</h5>
-                  <ul>
-                    <li v-for="menuId in selectedMenus" :key="menuId">
-                      {{menus.find(menu => menu.menuId === menuId)?.name || "Không xác định"}}
-                    </li>
-                  </ul>
-                  <h5>Dịch Vụ:</h5>
-                  <ul>
-                    <li v-for="serviceId in selectedServices" :key="serviceId">
-                      {{services.find(service => service.serviceId === serviceId)?.name || "Không xác định"}}
-                    </li>
-                  </ul>
-                  <h5>Tổng Tiền: {{ formatPrice(calculateTotalPrice()) }}</h5>
-                  <button type="button" class="btn btn-primary mt-3" @click="confirmOrder">
-                    Xác Nhận Đơn Hàng
-                  </button>
-                </div>
-                <button type="button" class="btn btn-success mt-3" style="max-height: 50px; padding: 10px 20px;border-radius: 8px;font-weight: 50;transition: all 0.3s ease;" @click="handleVnPayPayment">
-                  Thanh toán VNPAY
-                </button>
-              </Accordion.Body>
-              <!-- ...existing code... -->
+            <div class="text-center mt-4">
+              <button type="button" class="btn btn-primary"
+                style="background: #ff6b6b; border: none; padding: 10px 30px; border-radius: 6px; font-size: 16px;"
+                @click="showConfirmModal = true">
+                Xác nhận đặt nhà hàng
+              </button>
+            </div>
 
-              <!-- ...existing code... -->
-            </Accordion.Item>
+            <!-- Modal xác nhận và thanh toán -->
+            <Modal v-if="showConfirmModal" @close="showConfirmModal = false">
+              <template #header>
+                <div style="display: flex; align-items: center;">
+                  <i class="fas fa-clipboard-check" style="margin-right: 10px; color: #27ae60"></i>
+                  <span style="font-size: 28px; font-weight: bold;">Xác nhận đặt nhà hàng</span>
+                </div>
+              </template>
+              <template #body>
+                <div style="display: flex; flex-direction: column; align-items: center;">
+                  <button type="button" class="btn"
+                    style="background: #7b61ff; color: #fff; font-weight: 600; font-size: 18px; border-radius: 10px; margin-top: 30px; margin-bottom: 20px; width: 250px;"
+                    @click="handleCheckOrder" :disabled="isChecking">
+                    <i class="fas fa-search" style="margin-right: 8px;"></i>
+                    {{ isChecking ? 'Đang kiểm tra...' : 'Kiểm tra đơn hàng' }}
+                  </button>
+
+                  <div v-if="orderChecked === true" style="color: green; font-weight: bold; margin-bottom: 20px;">
+                    Thông tin đơn hàng hợp lệ.
+                  </div>
+                  <div v-else-if="orderChecked === false && checkClicked"
+                    style="color: red; font-weight: bold; margin-bottom: 20px;">
+                    Đơn hàng không hợp lệ. Vui lòng kiểm tra lại.
+                  </div>
+
+                  <div
+                    style="background: #fff; border-radius: 16px; box-shadow: 0 2px 8px #eee; padding: 24px 20px; width: 320px; text-align: center;">
+                    <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+                      <i class="fas fa-money-bill-wave"
+                        style="color: #f4c542; font-size: 28px; margin-right: 10px;"></i>
+                      <span style="font-size: 22px; font-weight: 600;">Thanh toán đặt cọc 50%</span>
+                    </div>
+                    <button type="button" class="btn"
+                      style="background: linear-gradient(90deg, #00c6fb 0%, #43e97b 100%); color: #fff; font-weight: 600; font-size: 16px; border-radius: 8px; width: 90%; margin-top: 10px;"
+                      @click="handleVnPayPayment" :disabled="!orderChecked">
+                      <i class="fas fa-credit-card" style="margin-right: 8px;"></i>
+                      Thanh toán online
+                    </button>
+                  </div>
+                </div>
+              </template>
+              <template #footer>
+                <button class="btn btn-secondary" style="width: 120px;" @click="showConfirmModal = false">
+                  <i class="fas fa-times"></i> Đóng
+                </button>
+              </template>
+            </Modal>
+
+
             <!-- Nút gọi mở modal chi tiết đơn hàng -->
             <button type="button" class="btn btn-info mt-4"
               style="position: fixed; bottom: 90px; right: 0; z-index: 1000" @click="toggleOrderModal">
@@ -293,6 +317,11 @@ const showOrderModal = ref(false); // Trạng thái điều khiển modal
 // Toast thông báo
 const toast = useToast();
 
+
+
+
+
+
 // Lưu thông tin người đặt
 watch(fullName, (val) => localStorage.setItem("fullName", val));
 watch(phoneNumber, (val) => localStorage.setItem("phoneNumber", val));
@@ -305,6 +334,17 @@ watch(selectedBranchId, (val) => localStorage.setItem("selectedBranchId", val));
 watch(selectedHallId, (val) => localStorage.setItem("selectedHallId", val));
 watch(selectedMenus, (val) => localStorage.setItem("selectedMenus", JSON.stringify(val)));
 watch(selectedServices, (val) => localStorage.setItem("selectedServices", JSON.stringify(val)));
+
+
+//kiem tra don hang
+const orderChecked = ref(false);
+const isChecking = ref(false);
+const checkClicked = ref(false);
+
+
+const showConfirmModal = ref(false);
+
+
 
 
 
@@ -394,28 +434,28 @@ const handleServiceCheckboxChange = (serviceId) => {
 
 const validateOrder = async () => {
   if (!fullName.value.trim()) {
-    console.log("Họ và tên không hợp lệ");
     toast.error("Vui lòng nhập họ và tên!");
     return false;
   }
   if (!phoneNumber.value.trim() || !/^[0-9]{10}$/.test(phoneNumber.value)) {
-    console.log("Số điện thoại không hợp lệ");
     toast.error("Vui lòng nhập số điện thoại hợp lệ (10 chữ số)!");
     return false;
   }
   if (!selectedDate.value) {
-    console.log("Ngày tổ chức chưa được chọn");
     toast.error("Vui lòng chọn ngày tổ chức!");
     return false;
   }
   if (!selectedTimeSlot.value) {
-    console.log("Buổi tổ chức chưa được chọn");
     toast.error("Vui lòng chọn buổi tổ chức!");
     return false;
   }
   if (selectedMenus.value.length < 3) {
-    console.log("Số lượng món ăn không đủ");
     toast.error("Vui lòng chọn ít nhất 3 món ăn!");
+    return false;
+  }
+  // Thêm kiểm tra dịch vụ ở đây
+  if (selectedServices.value.length < 1) {
+    toast.error("Vui lòng chọn ít nhất 1 dịch vụ!");
     return false;
   }
 
@@ -426,17 +466,14 @@ const validateOrder = async () => {
       TimeHall: selectedTimeSlot.value,
     });
     if (response.status === 400) {
-      console.log("Sảnh đã bị đặt trước");
       toast.error("Sảnh đã được đặt vào thời gian này. Vui lòng chọn sảnh khác!");
       return false;
     }
   } catch (error) {
-    console.error("Error checking hall availability:", error);
     toast.error("Không thể kiểm tra trạng thái sảnh. Vui lòng thử lại!");
     return false;
   }
 
-  console.log("Tất cả điều kiện hợp lệ");
   return true;
 };
 
@@ -624,15 +661,33 @@ const handleVnPayPayment = async () => {
 };
 
 
+// Hàm kiểm tra tính hợp lệ của đơn hàng
+const handleCheckOrder = async () => {
+  isChecking.value = true;
+  checkClicked.value = true;
+  const valid = await validateOrder();
+  orderChecked.value = valid;
+  isChecking.value = false;
+
+  if (valid) {
+    toast.success("Đơn hàng hợp lệ! Bạn có thể thanh toán.");
+  } else {
+    toast.error("Đơn hàng không hợp lệ. Vui lòng kiểm tra lại.");
+  }
+};
+
 
 // Lifecycle hook
 onMounted(async () => {
-  await fetchBranches();
-  await fetchMenus();
-  await fetchServices();
-  await fetchPromoCodes();
+  // Gọi song song các API lấy dữ liệu chính để tối ưu tốc độ load ban đầu
+  await Promise.all([
+    fetchBranches(),
+    fetchMenus(),
+    fetchServices(),
+    fetchPromoCodes()
+  ]);
 
-  // Lấy lại dữ liệu từ localStorage SAU khi đã fetch xong menus/services
+  //  Lấy dữ liệu từ localStorage sau khi dữ liệu gốc đã sẵn sàng
   fullName.value = localStorage.getItem("fullName") || "";
   phoneNumber.value = localStorage.getItem("phoneNumber") || "";
   note.value = localStorage.getItem("note") || "";
@@ -643,11 +698,12 @@ onMounted(async () => {
   selectedMenus.value = localStorage.getItem("selectedMenus") ? JSON.parse(localStorage.getItem("selectedMenus")) : [];
   selectedServices.value = localStorage.getItem("selectedServices") ? JSON.parse(localStorage.getItem("selectedServices")) : [];
 
-  // Nếu đã có selectedBranchId thì tự động load sảnh cưới cho chi nhánh đó
+  //  Nếu người dùng đã chọn chi nhánh trước đó thì tự động load danh sách sảnh tương ứng
   if (selectedBranchId.value) {
     await handleBranchCheckboxChange(selectedBranchId.value);
   }
 });
+
 </script>
 
 <style scoped></style>

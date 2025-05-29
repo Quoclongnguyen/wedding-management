@@ -10,6 +10,7 @@ import ListService from '@/components/page/ListService/ListService.vue'
 import Bill from '@/components/page/Bill/Bill.vue'
 import History from '@/components/page/History/History.vue'
 
+import Payment from '@/components/page/Payment/Payment.vue'
 
 
 
@@ -28,6 +29,7 @@ const routes = [
   { path: '/listservice', name :'ListService', component: ListService},
   { path: '/bill', name :'Bill', component: Bill},
   { path: '/history', name :'History', component: History },
+  { path: '/payment', name: 'Payment', component: Payment },
 
  
 
