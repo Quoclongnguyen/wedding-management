@@ -147,7 +147,7 @@
                 </div>
                 <p v-if="discount > 0" class="mt-3">
                   Đã áp dụng mã giảm giá: <strong>{{ selectedPromoCode.codeName }}</strong> - Giảm <strong>{{ discount
-                  }}%</strong>
+                    }}%</strong>
                 </p>
               </Accordion.Body>
             </Accordion.Item>
@@ -177,8 +177,13 @@
                     Xác Nhận Đơn Hàng
                   </button>
                 </div>
-
+                <button type="button" class="btn btn-success mt-3" style="max-height: 50px; padding: 10px 20px;border-radius: 8px;font-weight: 50;transition: all 0.3s ease;" @click="handleVnPayPayment">
+                  Thanh toán VNPAY
+                </button>
               </Accordion.Body>
+              <!-- ...existing code... -->
+
+              <!-- ...existing code... -->
             </Accordion.Item>
             <!-- Nút gọi mở modal chi tiết đơn hàng -->
             <button type="button" class="btn btn-info mt-4"
@@ -189,7 +194,7 @@
             <!-- Hiển thị Modal xem chi tiết đơn hàng -->
             <Modal v-if="showOrderModal" @close="toggleOrderModal">
               <template #header>
-                <h3 >Chi Tiết Đơn Hàng</h3>
+                <h3>Chi Tiết Đơn Hàng</h3>
               </template>
               <template #body>
                 <div>
@@ -254,6 +259,7 @@ import { useToast } from "vue-toastification";
 import axios from "axios";
 import Cookies from "js-cookie";
 import jwt_decode from "jwt-decode";
+import { watch } from "vue";
 
 
 import Modal from '@/components/common/Modal.vue'; // Đường dẫn tùy thuộc vào vị trí file Modal
@@ -286,6 +292,21 @@ const showOrderModal = ref(false); // Trạng thái điều khiển modal
 
 // Toast thông báo
 const toast = useToast();
+
+// Lưu thông tin người đặt
+watch(fullName, (val) => localStorage.setItem("fullName", val));
+watch(phoneNumber, (val) => localStorage.setItem("phoneNumber", val));
+watch(note, (val) => localStorage.setItem("note", val));
+
+// Lưu ngày tổ chức, ca, sảnh, món ăn, dịch vụ
+watch(selectedDate, (val) => localStorage.setItem("selectedDate", val));
+watch(selectedTimeSlot, (val) => localStorage.setItem("selectedTimeSlot", val));
+watch(selectedBranchId, (val) => localStorage.setItem("selectedBranchId", val));
+watch(selectedHallId, (val) => localStorage.setItem("selectedHallId", val));
+watch(selectedMenus, (val) => localStorage.setItem("selectedMenus", JSON.stringify(val)));
+watch(selectedServices, (val) => localStorage.setItem("selectedServices", JSON.stringify(val)));
+
+
 
 // Hàm gọi API để lấy danh sách chi nhánh
 const fetchBranches = async () => {
@@ -540,16 +561,92 @@ const toggleOrderModal = () => {
   showOrderModal.value = !showOrderModal.value;
 };
 
+const handleVnPayPayment = async () => {
+  try {
+    // 1. Tạo đơn hàng mới
+    const token = Cookies.get("token_user");
+    if (!token) {
+      toast.error("Bạn cần đăng nhập để đặt hàng!");
+      return;
+    }
+    const decoded = jwt_decode(token);
+    const userId = decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"];
 
+    // Chuẩn bị dữ liệu đơn hàng
+    const orderData = {
+      UserId: userId,
+      BranchId: selectedBranchId.value,
+      HallId: selectedHallId.value,
+      OrderMenus: selectedMenus.value.map(menuId => ({ MenuID: menuId, Quantity: 1 })),
+      OrderServices: selectedServices.value.map(serviceId => ({ ServiceID: serviceId, Quantity: 1 })),
+      AttendanceDate: selectedDate.value,
+      TimeHall: selectedTimeSlot.value,
+      FullName: fullName.value,
+      PhoneNumber: phoneNumber.value,
+      Note: note.value || "",
+      InvoiceCodeRequest: selectedPromoCode.value
+        ? [{ CodeId: selectedPromoCode.value.codeId }]
+        : [],
+      Total: calculateTotalPrice(),
+      TotalBeforeDiscount: calculateTotalPrice() / (1 - discount.value / 100),
+      DepositPayment: calculateTotalPrice() / 2,
+      PaymentWallet: false
+    };
+
+    // 1. Gửi đơn hàng lên backend
+    const res = await fetch("https://localhost:7296/api/invoice", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(orderData),
+    });
+
+    if (!res.ok) throw new Error("Tạo đơn hàng thất bại");
+
+    const result = await res.json();
+    const invoiceId = result.invoiceId || result.invoiceID || result.id;
+    if (!invoiceId) throw new Error("Không nhận được mã đơn hàng");
+
+    // 2. Gọi API lấy URL thanh toán VNPAY
+    const urlRes = await fetch(`https://localhost:7296/api/payment/get-payment-url?invoiceId=${invoiceId}&amount=${orderData.Total}`);
+    if (!urlRes.ok) throw new Error("Lấy URL thanh toán thất bại");
+
+    const paymentUrl = await urlRes.text();
+
+    // 3. Lưu lại invoiceId để xác nhận sau thanh toán
+    localStorage.setItem("invoiceId", invoiceId.toString());
+
+    // 4. Redirect sang VNPAY
+    window.location.href = paymentUrl;
+  } catch (err) {
+    console.error("Lỗi khi xử lý thanh toán:", err);
+    toast.error("Không thể thực hiện thanh toán. Vui lòng thử lại.");
+  }
+};
 
 
 
 // Lifecycle hook
-onMounted(() => {
-  fetchBranches();
-  fetchMenus();
-  fetchServices();
-  fetchPromoCodes(); // Gọi API lấy mã giảm giá
+onMounted(async () => {
+  await fetchBranches();
+  await fetchMenus();
+  await fetchServices();
+  await fetchPromoCodes();
+
+  // Lấy lại dữ liệu từ localStorage SAU khi đã fetch xong menus/services
+  fullName.value = localStorage.getItem("fullName") || "";
+  phoneNumber.value = localStorage.getItem("phoneNumber") || "";
+  note.value = localStorage.getItem("note") || "";
+  selectedDate.value = localStorage.getItem("selectedDate") || null;
+  selectedTimeSlot.value = localStorage.getItem("selectedTimeSlot") || "";
+  selectedBranchId.value = localStorage.getItem("selectedBranchId") ? Number(localStorage.getItem("selectedBranchId")) : null;
+  selectedHallId.value = localStorage.getItem("selectedHallId") ? Number(localStorage.getItem("selectedHallId")) : null;
+  selectedMenus.value = localStorage.getItem("selectedMenus") ? JSON.parse(localStorage.getItem("selectedMenus")) : [];
+  selectedServices.value = localStorage.getItem("selectedServices") ? JSON.parse(localStorage.getItem("selectedServices")) : [];
+
+  // Nếu đã có selectedBranchId thì tự động load sảnh cưới cho chi nhánh đó
+  if (selectedBranchId.value) {
+    await handleBranchCheckboxChange(selectedBranchId.value);
+  }
 });
 </script>
 
