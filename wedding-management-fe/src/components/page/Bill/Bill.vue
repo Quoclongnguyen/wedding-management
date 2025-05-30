@@ -4,27 +4,40 @@
       <div class="bill-form-container display-flex justify-content-center align-items-center">
         <h1 class="title">Đơn Hàng</h1>
         <form>
-          <Accordion>
-            <!-- Chi Nhánh -->
-            <Accordion.Item eventKey="0">
-              <Accordion.Header>Chi Nhánh</Accordion.Header>
-              <Accordion.Body class="body">
-                <div v-for="(branch, index) in branchs" :key="index" class="menu-card" style="width: 18rem;">
-                  <img class="image-fixed-height" :src="branch.image" alt="Branch Image" />
-                  <div class="card-body">
-                    <h5 class="card-title">{{ branch.name }}</h5>
-                    <p class="card-text">Mô tả: {{ branch.description }}</p>
-                    <p class="card-text">Địa chỉ: {{ branch.address }}</p>
-                    <p class="card-text">SDT: {{ branch.phone }}</p>
-                    <div class="form-check">
-                      <input class="form-check-input" type="checkbox" :id="'flexCheckDefault-' + index"
-                        :checked="branch.branchId === selectedBranchId"
-                        @change="handleBranchCheckboxChange(branch.branchId)" />
-                    </div>
+
+
+          <div class="accordion-item">
+            <button type="button" class="branch-toggle-button" @click="isBranchOpen = !isBranchOpen">
+
+              Chi Nhánh
+            </button>
+
+            <div v-show="isBranchOpen" class="accordion-body">
+              <div v-for="(branch, index) in branchs" :key="index" class="menu-card"
+                style="width: 18rem; margin-bottom: 16px; margin-right: 16px; ">
+                <img class="card-img-top image-fixed-height" :src="branch.image" />
+                <div class="card-body">
+                  <h5 class="card-title">{{ branch.name }}</h5>
+                  <p class="card-text">Mô tả: {{ branch.description }}</p>
+                  <p class="card-text">Địa chỉ: {{ branch.address }}</p>
+                  <p class="card-text">SDT: {{ branch.phone }}</p>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" :id="'flexCheckDefault-' + index"
+                      :checked="branch.branchId === selectedBranchId"
+                      @change="() => handleBranchCheckboxChange(branch.branchId)" />
                   </div>
                 </div>
-              </Accordion.Body>
-            </Accordion.Item>
+              </div>
+            </div>
+          </div>
+
+
+
+
+          <Accordion>
+
+
+
 
             <!-- Sảnh Cưới -->
             <Accordion.Item eventKey="1">
@@ -147,7 +160,7 @@
                 </div>
                 <p v-if="discount > 0" class="mt-3">
                   Đã áp dụng mã giảm giá: <strong>{{ selectedPromoCode.codeName }}</strong> - Giảm <strong>{{ discount
-                  }}%</strong>
+                    }}%</strong>
                 </p>
               </Accordion.Body>
             </Accordion.Item>
@@ -288,6 +301,15 @@ import { watch } from "vue";
 
 import Modal from '@/components/common/Modal.vue'; // Đường dẫn tùy thuộc vào vị trí file Modal
 // State
+const isBranchOpen = ref(false);
+
+const activeKey = ref(null);
+const toggleAccordion = (key) => {
+  activeKey.value = activeKey.value === key ? null : key;
+};
+
+
+
 const branchs = ref([]);
 const selectedBranchId = ref(null);
 const hallsByBranch = ref([]);
@@ -317,8 +339,10 @@ const showOrderModal = ref(false); // Trạng thái điều khiển modal
 // Toast thông báo
 const toast = useToast();
 
-
-
+// Hàm toggle để mở/đóng danh sách chi nhánh
+const toggleBranch = () => {
+  isBranchOpen.value = !isBranchOpen.value;
+};
 
 
 
@@ -706,4 +730,14 @@ onMounted(async () => {
 
 </script>
 
-<style scoped></style>
+<style scoped>
+
+
+
+
+
+
+
+
+
+</style>

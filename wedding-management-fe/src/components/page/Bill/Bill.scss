@@ -7,6 +7,28 @@
     /* Khoảng cách giữa các món ăn */
 }
 
+/*
+.accordion-header {
+  background: linear-gradient(90deg, #fe8e5c 0%, #f5576c 100%);
+  color: white !important;
+  padding: 12px 20px;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+*/
+.accordion-arrow {
+  transition: transform 0.3s ease;
+}
+
+.accordion-arrow.rotate {
+  transform: rotate(180deg);
+}
+
+
 .selected-menu {
     display: flex;
     /* Sử dụng hiển thị theo kiểu flexbox để hình ảnh và chi tiết nằm cùng một hàng */
@@ -172,6 +194,12 @@ img {
     }
 }
 
+.modal-body {
+  max-height: 70vh; 
+  overflow-y: auto; /* Kích hoạt cuộn dọc */
+  padding-right: 15px; 
+}
+
 .form-control {
     border-radius: 8px;
     border: 1px solid #e0e0e0;
@@ -200,6 +228,7 @@ img {
         }
     }
 }
+/* 
 
 .accordion {
     margin-top: 30px;
@@ -238,6 +267,7 @@ img {
     }
 }
 
+*/
 .modal {
     .modal-content {
         border-radius: 15px;
@@ -1155,4 +1185,89 @@ html {
     color: #666;
     font-style: italic;
   }
+}
+
+
+
+.custom-accordion-header {
+  background: #f8f9fa;
+  font-weight: 600;
+  font-size: 17px;
+  padding: 18px 18px;
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.custom-accordion-header.active {
+  background: linear-gradient(90deg, #fe8e5c 0%, #f5576c 100%);
+  color: #fff;
+}
+.arrow {
+  border: solid #333;
+  border-width: 0 2px 2px 0;
+  display: inline-block;
+  padding: 4px;
+  margin-left: 8px;
+  transform: rotate(45deg);
+  transition: transform 0.2s;
+}
+.arrow.open {
+  transform: rotate(-135deg);
+  border-color: #fff;
+}
+.branch-list {
+  display: flex;
+  gap: 24px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+.menu-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px #eee;
+  padding: 13px;
+  width: 360px;
+}
+
+
+
+
+.branch-toggle-button {
+  background: #f8f9fa;               // Nền mặc định khi chưa mở
+  color: #212529;      
+  width: 100%;          // Màu chữ mặc định
+  font-weight: 600;
+  font-size: 16px;
+  padding: 1rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+                  &:not(.collapsed) {
+                    background: linear-gradient(
+                        90deg,
+                        #fe8e5c 0%,
+                        #f5576c 100%
+                    );
+                    color: white;
+                }
+                &:focus {
+  box-shadow: none;
+}
+
+
+
+}
+.accordion-body {
+  margin-top:   18px ;
+  margin-bottom:   18px ;
+  display: flex;
+  padding :12px;
+  justify-content: center;
+ 
+
 }
