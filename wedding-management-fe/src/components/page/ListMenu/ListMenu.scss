@@ -19,6 +19,8 @@
     }
 }
 
+
+
 .tilte {
     margin-top: 150px;
     // display: flex;
@@ -111,6 +113,11 @@
     }
 
     .menu-grid {
+          max-width: 2200px;
+          margin: 0 auto;
+          
+        
+
         .menu-item {
             margin-bottom: 30px;
         }
@@ -121,6 +128,8 @@
             overflow: hidden;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             transition: transform 0.3s ease;
+            width: auto;
+            gap: 20px;
 
             &:hover {
                 transform: translateY(-10px);
@@ -129,6 +138,8 @@
             .image-wrapper {
                 position: relative;
                 height: 200px;
+                
+                
 
                 .menu-image {
                     width: 100%;

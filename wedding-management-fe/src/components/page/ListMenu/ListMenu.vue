@@ -25,11 +25,11 @@
     </div>
 
     <div class="menu-grid">
-      <div class="row">
+      <div class="row gx-2 gy-3 justify-content-center">
         <div
           v-for="menuItem in (searchResult.length > 0 ? searchResult : menus)"
           :key="menuItem.menuId"
-          class="col-xs-12 col-md-4 col-lg-3 menu-item"
+          class="col-xs-12 col-md-3 col-lg-2 menu-item"
         >
           <div class="menu-card">
             <div class="image-wrapper">
