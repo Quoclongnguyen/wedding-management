@@ -160,7 +160,7 @@
                 </div>
                 <p v-if="discount > 0" class="mt-3">
                   Đã áp dụng mã giảm giá: <strong>{{ selectedPromoCode.codeName }}</strong> - Giảm <strong>{{ discount
-                    }}%</strong>
+                  }}%</strong>
                 </p>
               </Accordion.Body>
             </Accordion.Item>
@@ -303,6 +303,12 @@ import Modal from '@/components/common/Modal.vue'; // Đường dẫn tùy thu�
 // State
 const isBranchOpen = ref(false);
 
+
+
+
+
+
+
 const activeKey = ref(null);
 const toggleAccordion = (key) => {
   activeKey.value = activeKey.value === key ? null : key;
@@ -367,6 +373,7 @@ const checkClicked = ref(false);
 
 
 const showConfirmModal = ref(false);
+
 
 
 
@@ -624,16 +631,33 @@ const toggleOrderModal = () => {
 
 const handleVnPayPayment = async () => {
   try {
-    // 1. Tạo đơn hàng mới
+    // 1. Kiểm tra hợp lệ đơn hàng
+    const isValid = await validateOrder();
+    if (!isValid) {
+      toast.error("Vui lòng kiểm tra lại thông tin đơn hàng!");
+      return;
+    }
+
+    // 2. Lấy token và userId
     const token = Cookies.get("token_user");
     if (!token) {
       toast.error("Bạn cần đăng nhập để đặt hàng!");
       return;
     }
-    const decoded = jwt_decode(token);
-    const userId = decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"];
+    let userId;
+    try {
+      const decoded = jwt_decode(token);
+      userId = decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"];
+      if (!userId) throw new Error();
+    } catch {
+      toast.error("Token không hợp lệ. Vui lòng đăng nhập lại.");
+      return;
+    }
 
-    // Chuẩn bị dữ liệu đơn hàng
+    // 3. Chuẩn bị dữ liệu đơn hàng
+    const total = calculateTotalPrice();
+    const totalBeforeDiscount = total / (1 - discount.value / 100);
+
     const orderData = {
       UserId: userId,
       BranchId: selectedBranchId.value,
@@ -648,42 +672,70 @@ const handleVnPayPayment = async () => {
       InvoiceCodeRequest: selectedPromoCode.value
         ? [{ CodeId: selectedPromoCode.value.codeId }]
         : [],
-      Total: calculateTotalPrice(),
-      TotalBeforeDiscount: calculateTotalPrice() / (1 - discount.value / 100),
-      DepositPayment: calculateTotalPrice() / 2,
+      Total: total,
+      TotalBeforeDiscount: totalBeforeDiscount,
+      DepositPayment: total / 2,
       PaymentWallet: false
     };
 
-    // 1. Gửi đơn hàng lên backend
+    // 4. Gửi đơn hàng lên backend
     const res = await fetch("https://localhost:7296/api/invoice", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(orderData),
     });
 
-    if (!res.ok) throw new Error("Tạo đơn hàng thất bại");
+    // 5. Xử lý lỗi trả về từ backend
+    if (!res.ok) {
+      let errorMsg = "Tạo đơn hàng thất bại!";
+      try {
+        const errorJson = await res.json();
+        errorMsg = errorJson.message || errorMsg;
+      } catch {
+        const errorText = await res.text();
+        if (errorText) errorMsg = errorText;
+      }
+      toast.error(errorMsg);
+      return;
+    }
 
+    // 6. Lấy invoiceId từ response
     const result = await res.json();
     const invoiceId = result.invoiceId || result.invoiceID || result.id;
-    if (!invoiceId) throw new Error("Không nhận được mã đơn hàng");
+    if (!invoiceId) {
+      toast.error("Không nhận được mã đơn hàng từ hệ thống.");
+      return;
+    }
 
-    // 2. Gọi API lấy URL thanh toán VNPAY
-    const urlRes = await fetch(`https://localhost:7296/api/payment/get-payment-url?invoiceId=${invoiceId}&amount=${orderData.Total}`);
-    if (!urlRes.ok) throw new Error("Lấy URL thanh toán thất bại");
+    // 7. Gọi API lấy link thanh toán VNPAY
+   const depositAmount = Math.round(total / 2);
+const urlRes = await fetch(`https://localhost:7296/api/payment/get-payment-url?invoiceId=${invoiceId}&amount=${depositAmount}`);
+    if (!urlRes.ok) {
+      let errMsg = "Lỗi khi lấy URL thanh toán!";
+      try {
+        const errJson = await urlRes.json();
+        errMsg = errJson.message || errMsg;
+      } catch {
+        const errText = await urlRes.text();
+        if (errText) errMsg = errText;
+      }
+      toast.error(errMsg);
+      return;
+    }
 
     const paymentUrl = await urlRes.text();
 
-    // 3. Lưu lại invoiceId để xác nhận sau thanh toán
+    // 8. Lưu invoiceId để xử lý sau khi thanh toán xong
     localStorage.setItem("invoiceId", invoiceId.toString());
 
-    // 4. Redirect sang VNPAY
+    // 9. Redirect sang trang VNPAY
     window.location.href = paymentUrl;
+
   } catch (err) {
     console.error("Lỗi khi xử lý thanh toán:", err);
     toast.error("Không thể thực hiện thanh toán. Vui lòng thử lại.");
   }
 };
-
 
 // Hàm kiểm tra tính hợp lệ của đơn hàng
 const handleCheckOrder = async () => {
@@ -730,14 +782,4 @@ onMounted(async () => {
 
 </script>
 
-<style scoped>
-
-
-
-
-
-
-
-
-
-</style>
+<style scoped></style>
