@@ -160,7 +160,7 @@
                 </div>
                 <p v-if="discount > 0" class="mt-3">
                   Đã áp dụng mã giảm giá: <strong>{{ selectedPromoCode.codeName }}</strong> - Giảm <strong>{{ discount
-                  }}%</strong>
+                    }}%</strong>
                 </p>
               </Accordion.Body>
             </Accordion.Item>
@@ -468,45 +468,63 @@ const validateOrder = async () => {
     toast.error("Vui lòng nhập họ và tên!");
     return false;
   }
+
   if (!phoneNumber.value.trim() || !/^[0-9]{10}$/.test(phoneNumber.value)) {
     toast.error("Vui lòng nhập số điện thoại hợp lệ (10 chữ số)!");
     return false;
   }
+
   if (!selectedDate.value) {
     toast.error("Vui lòng chọn ngày tổ chức!");
     return false;
   }
+
   if (!selectedTimeSlot.value) {
     toast.error("Vui lòng chọn buổi tổ chức!");
     return false;
   }
+
+  if (!selectedBranchId.value) {
+    toast.error("Vui lòng chọn chi nhánh!");
+    return false;
+  }
+
+  if (!selectedHallId.value) {
+    toast.error("Vui lòng chọn sảnh cưới!");
+    return false;
+  }
+
   if (selectedMenus.value.length < 3) {
     toast.error("Vui lòng chọn ít nhất 3 món ăn!");
     return false;
   }
-  // Thêm kiểm tra dịch vụ ở đây
+
   if (selectedServices.value.length < 1) {
     toast.error("Vui lòng chọn ít nhất 1 dịch vụ!");
     return false;
   }
 
   try {
-    const response = await axios.post("https://localhost:7296/api/invoice/checked", {
+    await axios.post("https://localhost:7296/api/invoice/checked", {
       AttendanceDate: selectedDate.value,
+      BranchId: selectedBranchId.value,
       HallId: selectedHallId.value,
       TimeHall: selectedTimeSlot.value,
     });
-    if (response.status === 400) {
-      toast.error("Sảnh đã được đặt vào thời gian này. Vui lòng chọn sảnh khác!");
-      return false;
-    }
+    return true;
   } catch (error) {
-    toast.error("Không thể kiểm tra trạng thái sảnh. Vui lòng thử lại!");
+    // Nếu backend trả lỗi 400 là bị trùng
+    if (error.response && error.response.status === 400) {
+      // Hiển thị rõ lý do bị trùng
+      const msg = error.response.data?.message || "Sảnh đã được đặt vào thời gian này. Vui lòng chọn sảnh khác!";
+      toast.error(msg);
+    } else {
+      toast.error("Không thể kiểm tra trạng thái sảnh. Vui lòng thử lại!");
+    }
     return false;
   }
-
-  return true;
 };
+
 
 const handleSubmitOrder = async () => {
   const isValid = await validateOrder();
@@ -708,8 +726,8 @@ const handleVnPayPayment = async () => {
     }
 
     // 7. Gọi API lấy link thanh toán VNPAY
-   const depositAmount = Math.round(total / 2);
-const urlRes = await fetch(`https://localhost:7296/api/payment/get-payment-url?invoiceId=${invoiceId}&amount=${depositAmount}`);
+    const depositAmount = Math.round(total / 2);
+    const urlRes = await fetch(`https://localhost:7296/api/payment/get-payment-url?invoiceId=${invoiceId}&amount=${depositAmount}`);
     if (!urlRes.ok) {
       let errMsg = "Lỗi khi lấy URL thanh toán!";
       try {
