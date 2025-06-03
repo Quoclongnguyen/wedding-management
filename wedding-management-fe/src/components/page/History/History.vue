@@ -101,7 +101,7 @@ const demoPayment = async () => {
     const invoiceId = selectedInvoice.value.invoiceID;
     const total = parseFloat(selectedInvoice.value.total || 0);
     const deposit = parseFloat(selectedInvoice.value.depositPayment || 0);
-    const amount = Math.floor(total - deposit); // ✅ dùng Math.floor để tránh số lẻ
+    const amount = Math.floor(total - deposit); // dùng Math.floor để tránh số lẻ
 
     //  Log để kiểm tra
     console.log("===> InvoiceID:", invoiceId);
@@ -235,40 +235,37 @@ const handleCancelInvoice = () => {
 
 
 const getStatusBadge = (invoice) => {
-  // Đơn hàng đã hủy
-  if (invoice.orderStatus === 'Đã hủy đơn hàng') {
-    return { label: 'Đã hủy đơn hàng', class: 'badge bg-danger' };
+  if (invoice.orderStatus === "Đã hủy đơn hàng") {
+    return { label: "Đã hủy đơn hàng", class: "badge bg-danger" };
   }
 
-  // Đơn đã hoàn tất thanh toán
-  if (invoice.orderStatus === 'Hoàn tất thanh toán' || invoice.paymentStatus) {
-    return {
-      label: invoice.paymentCompleteWallet
-        ? 'Đã hoàn tất thanh toán bằng ví'
-        : 'Đã hoàn tất thanh toán bằng VNPAY',
-      class: 'badge bg-success',
-    };
+  // Ưu tiên kiểm tra số tiền đã thanh toán thực tế
+  const deposit = invoice.depositPayment || 0;
+  const total = invoice.total || 0;
+
+  if (deposit >= total && total > 0) {
+    if (invoice.paymentCompleteWallet) {
+      return { label: "Đã hoàn tất thanh toán bằng ví", class: "badge bg-success" };
+    }
+    return { label: "Đã hoàn tất thanh toán bằng VNPAY", class: "badge bg-success" };
   }
 
-  // Đơn đã đặt cọc nhưng chưa thanh toán hết
-  if (invoice.orderStatus === 'Đã đặt cọc') {
-    return {
-      label: invoice.paymentWallet
-        ? 'Đã đặt cọc bằng ví'
-        : 'Đã đặt cọc bằng VNPAY',
-      class: 'badge bg-warning text-dark',
-    };
+  if (deposit > 0 && deposit < total) {
+    if (invoice.paymentWallet) {
+      return { label: "Đã đặt cọc bằng ví", class: "badge bg-warning text-dark" };
+    }
+    return { label: "Đã đặt cọc bằng VNPAY", class: "badge bg-warning text-dark" };
   }
 
-  // Các trạng thái khác
-  return {
-    label: invoice.orderStatus || 'Không xác định',
-    class: 'badge bg-secondary',
-  };
+  return { label: invoice.orderStatus || "Không xác định", class: "badge bg-secondary" };
 };
 
 
-const formatPrice = (price) => price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
+const formatPrice = (price) => {
+  if (price == null || isNaN(price)) return "0 ₫";
+  return price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
+};
+
 const formatDate = (date) => format(new Date(date), 'dd/MM/yyyy');
 </script>
 <template>
