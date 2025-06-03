@@ -24,11 +24,7 @@
         <div class="card main-card">
           <div class="card-body">
             <div class="d-flex justify-content-between mb-4">
-              <div class="search-box">
-                <i class="bi bi-search search-icon"></i>
-                <input class="form-control search-input" placeholder="Tìm kiếm theo email hoặc mã hóa đơn"
-                  v-model="searchTerm" @input="handleSearch" />
-              </div>
+
             </div>
 
             <!-- Loading Spinner -->
@@ -54,12 +50,13 @@
                   </tr>
                 </thead>
                 <tbody>
+                 
                   <tr v-for="invoice in displayItems" :key="invoice.invoiceID">
                     <td>#{{ invoice.invoiceID }}</td>
                     <td>
-                      <div class="item-name">{{ invoice.user.email }}</div>
+                      <div class="item-name">{{ invoice.user?.email }}</div>
                       <div class="item-description">
-                        <i class="bi bi-telephone me-1"></i>{{ invoice.user.phoneNumber }}
+                        <i class="bi bi-telephone me-1"></i>{{ invoice.user?.phoneNumber }}
                       </div>
                     </td>
                     <td>{{ formatDate(invoice.invoiceDate) }}</td>
@@ -95,17 +92,17 @@
             <!-- Pagination -->
             <nav v-if="pageCount > 1">
               <ul class="pagination justify-content-center">
-                <li class="page-item" :class="{disabled: currentPage === 0}">
-                  <button class="page-link" @click="changePage(currentPage - 1)" :disabled="currentPage === 0">&lt;</button>
+                <li class="page-item" :class="{ disabled: currentPage === 0 }">
+                  <button class="page-link" @click="changePage(currentPage - 1)"
+                    :disabled="currentPage === 0">&lt;</button>
                 </li>
-                <li class="page-item"
-                  v-for="page in pageCount"
-                  :key="page"
-                  :class="{active: currentPage === page - 1}">
+                <li class="page-item" v-for="page in pageCount" :key="page"
+                  :class="{ active: currentPage === page - 1 }">
                   <button class="page-link" @click="changePage(page - 1)">{{ page }}</button>
                 </li>
-                <li class="page-item" :class="{disabled: currentPage === pageCount - 1}">
-                  <button class="page-link" @click="changePage(currentPage + 1)" :disabled="currentPage === pageCount - 1">&gt;</button>
+                <li class="page-item" :class="{ disabled: currentPage === pageCount - 1 }">
+                  <button class="page-link" @click="changePage(currentPage + 1)"
+                    :disabled="currentPage === pageCount - 1">&gt;</button>
                 </li>
               </ul>
             </nav>
@@ -115,7 +112,8 @@
     </div>
 
     <!-- Detail Modal -->
-    <div v-if="detailModal" class="modal fade show d-block" tabindex="-1" style="background:rgba(0,0,0,0.5);z-index:1050;">
+    <div v-if="detailModal" class="modal fade show d-block" tabindex="-1"
+      style="background:rgba(0,0,0,0.5);z-index:1050;">
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <div class="modal-header">
@@ -127,14 +125,14 @@
               <h5 class="mb-4">Thông tin khách hàng</h5>
               <div class="row mb-4">
                 <div class="col-md-6">
-                  <p><strong>Họ tên:</strong> {{ selectedInvoice.user.fullName }}</p>
-                  <p><strong>Email:</strong> {{ selectedInvoice.user.email }}</p>
-                  <p><strong>Số điện thoại:</strong> {{ selectedInvoice.user.phoneNumber }}</p>
+                  <p><strong>Họ tên:</strong> {{ selectedInvoice.user?.fullName || '---' }}</p>
+                  <p><strong>Email:</strong> {{ selectedInvoice.user?.email || '---' }}</p>
+                  <p><strong>Số điện thoại:</strong> {{ selectedInvoice.user?.phoneNumber || '---' }}</p>
                 </div>
                 <div class="col-md-6">
                   <p><strong>Ngày đặt:</strong> {{ formatDate(selectedInvoice.invoiceDate) }}</p>
                   <p><strong>Ngày tổ chức:</strong> {{ formatDate(selectedInvoice.attendanceDate) }}</p>
-                  <p><strong>Ca:</strong> {{ selectedInvoice.timeHall }}</p>
+                  <p><strong>Ca:</strong> {{ selectedInvoice.timeHall || '---' }}</p>
                 </div>
               </div>
               <h5 class="mb-4">Chi tiết đơn hàng</h5>
@@ -147,14 +145,14 @@
                 </thead>
                 <tbody>
                   <tr>
-                    <td><strong>Sảnh:</strong> {{ selectedInvoice.hall.name }}</td>
-                    <td class="text-end">{{ formatCurrency(selectedInvoice.hall.price) }}</td>
+                    <td><strong>Sảnh:</strong> {{ selectedInvoice.hall?.name || '---' }}</td>
+                    <td class="text-end">{{ formatCurrency(selectedInvoice.hall?.price) }}</td>
                   </tr>
-                  <tr v-for="(menu, index) in selectedInvoice.orderMenus" :key="'menu-' + index">
+                  <tr v-for="(menu, index) in selectedInvoice.orderMenus || []" :key="'menu-' + index">
                     <td>{{ menu.name }}</td>
                     <td class="text-end">{{ formatCurrency(menu.price) }}</td>
                   </tr>
-                  <tr v-for="(service, index) in selectedInvoice.orderServices" :key="'service-' + index">
+                  <tr v-for="(service, index) in selectedInvoice.orderServices || []" :key="'service-' + index">
                     <td>{{ service.name }}</td>
                     <td class="text-end">{{ formatCurrency(service.price) }}</td>
                   </tr>
@@ -172,7 +170,9 @@
                   </tr>
                   <tr>
                     <td class="text-end"><strong>Còn lại:</strong></td>
-                    <td class="text-end">{{ formatCurrency(selectedInvoice.total - selectedInvoice.depositPayment) }}</td>
+                    <td class="text-end">
+                      {{ formatCurrency((selectedInvoice.total || 0) - (selectedInvoice.depositPayment || 0)) }}
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -186,7 +186,8 @@
     </div>
 
     <!-- Update Status Modal -->
-    <div v-if="updateStatusModal" class="modal fade show d-block" tabindex="-1" style="background:rgba(0,0,0,0.5);z-index:1050;">
+    <div v-if="updateStatusModal" class="modal fade show d-block" tabindex="-1"
+      style="background:rgba(0,0,0,0.5);z-index:1050;">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
@@ -217,7 +218,8 @@
     </div>
 
     <!-- Success Modal -->
-    <div v-if="successModal" class="modal fade show d-block" tabindex="-1" style="background:rgba(0,0,0,0.5);z-index:1050;">
+    <div v-if="successModal" class="modal fade show d-block" tabindex="-1"
+      style="background:rgba(0,0,0,0.5);z-index:1050;">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-body">
@@ -234,7 +236,8 @@
     </div>
 
     <!-- Edit Modal -->
-    <div v-if="editModal" class="modal fade show d-block" tabindex="-1" style="background:rgba(0,0,0,0.5);z-index:1050;">
+    <div v-if="editModal" class="modal fade show d-block" tabindex="-1"
+      style="background:rgba(0,0,0,0.5);z-index:1050;">
       <div class="modal-dialog modal-xl edit-invoice-modal">
         <div class="modal-content">
           <div class="modal-header">
@@ -281,7 +284,8 @@
           </div>
           <div class="modal-footer">
             <button class="btn btn-primary" @click="handleSaveEdit" :disabled="loading">
-              <span v-if="loading"><span class="spinner-border spinner-border-sm me-1" role="status"></span> Đang lưu...</span>
+              <span v-if="loading"><span class="spinner-border spinner-border-sm me-1" role="status"></span> Đang
+                lưu...</span>
               <span v-else><i class="bi bi-check-lg me-1"></i> Lưu thay đổi</span>
             </button>
             <button class="btn btn-secondary" @click="editModal = false"><i class="bi bi-x-lg me-1"></i> Hủy</button>
@@ -320,34 +324,40 @@ export default {
       loadingHalls: false,
       selectedStatus: '',
       loading: false,
+      error: null,
     };
   },
   computed: {
     pageCount() {
-      return this.invoices && this.invoices.length ? Math.ceil(this.invoices.length / 10) : 0;
+      const arr = this.searchTerm ? this.searchResults : this.invoices;
+      return Math.ceil(arr.length / 10);
     },
     displayItems() {
-      return this.searchTerm
-        ? this.searchResults
-        : this.invoices.slice(this.currentPage * 10, (this.currentPage + 1) * 10);
+      const arr = this.searchTerm ? this.searchResults : this.invoices;
+      return arr.slice(this.currentPage * 10, (this.currentPage + 1) * 10);
+
     },
   },
   methods: {
     fetchInvoices() {
       this.loading = true;
       invoiceApi.getAll()
-        .then((response) => {
-          this.invoices = response.data || [];
+        .then((data) => {
+          
+          this.invoices = Array.isArray(data) ? data : [];
+        
         })
-        .catch(() => {
+        .catch((err) => {
+          console.error(" Lỗi khi gọi API:", err); // Thêm dòng này
           this.error = "Không thể tải danh sách hóa đơn.";
+
         })
         .finally(() => {
           this.loading = false;
         });
     },
+
     fetchBranches() {
-      this.loading = true;
       fetch('https://localhost:7296/api/ApiBranch')
         .then((response) => response.json())
         .then((data) => {
@@ -355,13 +365,9 @@ export default {
         })
         .catch(() => {
           this.error = "Không thể tải danh sách chi nhánh.";
-        })
-        .finally(() => {
-          this.loading = false;
         });
     },
     fetchHalls() {
-      this.loading = true;
       fetch('https://localhost:7296/api/hall')
         .then((response) => response.json())
         .then((data) => {
@@ -369,13 +375,9 @@ export default {
         })
         .catch(() => {
           this.error = "Không thể tải danh sách sảnh.";
-        })
-        .finally(() => {
-          this.loading = false;
         });
     },
     fetchMenus() {
-      this.loading = true;
       fetch('https://localhost:7296/api/menu')
         .then((response) => response.json())
         .then((data) => {
@@ -383,13 +385,9 @@ export default {
         })
         .catch(() => {
           this.error = "Không thể tải danh sách thực đơn.";
-        })
-        .finally(() => {
-          this.loading = false;
         });
     },
     fetchServices() {
-      this.loading = true;
       fetch('https://localhost:7296/api/service')
         .then((response) => response.json())
         .then((data) => {
@@ -397,24 +395,28 @@ export default {
         })
         .catch(() => {
           this.error = "Không thể tải danh sách dịch vụ.";
-        })
-        .finally(() => {
-          this.loading = false;
         });
     },
     handleSearch() {
-      const term = this.searchTerm.toLowerCase();
+      const term = this.searchTerm.trim().toLowerCase();
+      if (!term) {
+        this.searchResults = [];
+        return;
+      }
       this.searchResults = this.invoices.filter(
         (invoice) =>
-          invoice.user?.email.toLowerCase().includes(term) ||
-          invoice.invoiceID.toString().includes(term)
+          invoice.user?.email?.toLowerCase().includes(term) ||
+          invoice.invoiceID?.toString().includes(term)
       );
+      this.currentPage = 0;
     },
     formatDate(date) {
+      if (!date) return "---";
       return new Date(date).toLocaleString("vi-VN");
     },
     formatCurrency(amount) {
-      return amount?.toLocaleString("vi-VN", { style: "currency", currency: "VND" });
+      if (amount == null) return "---";
+      return amount.toLocaleString("vi-VN", { style: "currency", currency: "VND" });
     },
     getStatusBadgeClass(status) {
       switch (status) {
@@ -458,16 +460,16 @@ export default {
       this.selectedInvoice = invoice;
       this.selectedBranch = invoice.branch;
       this.selectedHall = invoice.hall;
-      this.selectedMenus = invoice.orderMenus.map((om) => om.menuId);
-      this.selectedServices = invoice.orderServices.map((os) => os.serviceId);
+      this.selectedMenus = invoice.orderMenus?.map((om) => om.menuId) || [];
+      this.selectedServices = invoice.orderServices?.map((os) => os.serviceId) || [];
       this.editModal = true;
     },
     handleSaveEdit() {
       this.loading = true;
       const updatedInvoice = {
         ...this.selectedInvoice,
-        branchId: this.selectedBranch.branchId,
-        hallId: this.selectedHall.hallId,
+        branchId: this.selectedBranch?.branchId,
+        hallId: this.selectedHall?.hallId,
         orderMenus: this.selectedMenus.map((menuId) => ({ menuId })),
         orderServices: this.selectedServices.map((serviceId) => ({ serviceId })),
       };
