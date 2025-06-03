@@ -3,6 +3,7 @@
     background-color: #ffffff;
     position: relative;
     overflow: hidden;
+    
 
     &::before {
         content: "";
@@ -158,6 +159,7 @@
 
     &__right {
         flex: 1;
+        max-width: 600px;
 
         .image-wrapper {
             position: relative;

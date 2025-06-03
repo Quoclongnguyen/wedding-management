@@ -1,6 +1,6 @@
 <template>
   <div class="home" id="home">
-    <div class="home__container container">
+    <div class="home__container">
       <div class="home__left">
         <div class="content-wrapper">
           <span class="elegant-text">Nhà Hàng Tiệc Cưới</span>
