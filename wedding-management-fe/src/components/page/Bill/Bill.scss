@@ -1271,3 +1271,60 @@ html {
  
 
 }
+
+
+.accordion-item {
+  margin-bottom: 10px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: none;
+
+  .branch-toggle-button {
+    background: #f8f9fa;
+    color: #212529;
+    width: 100%;
+    font-weight: 600;
+    font-size: 16px;
+    padding: 1.2rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    text-align: left;
+
+    &.active {
+      background: linear-gradient(90deg, #fe8e5c 0%, #f5576c 100%);
+      color: white;
+    }
+
+    &:focus {
+      box-shadow: none;
+      outline: none;
+    }
+  }
+
+  .accordion-body {
+    padding: 1.5rem;
+    background: white;
+  }
+}
+
+// Animation slide-down
+.accordion-slide-enter-active,
+.accordion-slide-leave-active {
+  transition: max-height 0.4s ease, opacity 0.3s ease;
+  overflow: hidden;
+}
+
+.accordion-slide-enter-from,
+.accordion-slide-leave-to {
+  max-height: 0;
+  opacity: 0;
+}
+
+.accordion-slide-enter-to,
+.accordion-slide-leave-from {
+  max-height: 1000px;
+  opacity: 1;
+}

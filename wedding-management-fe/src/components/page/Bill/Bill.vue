@@ -5,45 +5,45 @@
         <h1 class="title">Đơn Hàng</h1>
         <form>
 
-
+          <!-- Chi Nhánh -->
           <div class="accordion-item">
-            <button type="button" class="branch-toggle-button" @click="isBranchOpen = !isBranchOpen">
-
+            <button type="button" class="branch-toggle-button" :class="{ active: openSection === 'branch' }"
+              @click="toggleSection('branch')">
               Chi Nhánh
             </button>
 
-            <div v-show="isBranchOpen" class="accordion-body">
-              <div v-for="(branch, index) in branchs" :key="index" class="menu-card"
-                style="width: 18rem; margin-bottom: 16px; margin-right: 16px; ">
-                <img class="card-img-top image-fixed-height" :src="branch.image" />
-                <div class="card-body">
-                  <h5 class="card-title">{{ branch.name }}</h5>
-                  <p class="card-text">Mô tả: {{ branch.description }}</p>
-                  <p class="card-text">Địa chỉ: {{ branch.address }}</p>
-                  <p class="card-text">SDT: {{ branch.phone }}</p>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" :id="'flexCheckDefault-' + index"
-                      :checked="branch.branchId === selectedBranchId"
-                      @change="() => handleBranchCheckboxChange(branch.branchId)" />
+            <transition name="accordion-slide">
+              <div v-if="openSection === 'branch'" class="accordion-body">
+                <div v-for="(branch, index) in branchs" :key="index" class="menu-card"
+                  style="width: 18rem; margin-bottom: 16px; margin-right: 16px">
+                  <img class="card-img-top image-fixed-height" :src="branch.image" alt="Branch image" />
+                  <div class="card-body">
+                    <h5 class="card-title">{{ branch.name }}</h5>
+                    <p class="card-text">Mô tả: {{ branch.description }}</p>
+                    <p class="card-text">Địa chỉ: {{ branch.address }}</p>
+                    <p class="card-text">SDT: {{ branch.phone }}</p>
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" :id="'flexCheckDefault-' + index"
+                        :checked="branch.branchId === selectedBranchId"
+                        @change="() => handleBranchCheckboxChange(branch.branchId)" />
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </transition>
           </div>
 
+          <!-- Sảnh Cưới -->
+          <div class="accordion-item">
+            <button type="button" class="branch-toggle-button" :class="{ active: openSection === 'hall' }"
+              @click="toggleSection('hall')">
+              Sảnh Cưới
+            </button>
 
-
-
-          <Accordion>
-
-
-
-
-            <!-- Sảnh Cưới -->
-            <Accordion.Item eventKey="1">
-              <Accordion.Header>Sảnh Cưới</Accordion.Header>
-              <Accordion.Body class="body">
-                <div v-for="(hall, index) in hallsByBranch" :key="index" class="menu-card" style="width: 18rem;">
+            <transition name="accordion-slide">
+              <div v-if="openSection === 'hall'" class="accordion-body">
+                <div v-for="(hall, index) in hallsByBranch" :key="index" class="menu-card"
+                  style="width: 18rem; margin-bottom: 16px; margin-right: 16px">
                   <img class="image-fixed-height" :src="hall.image" alt="Hall Image" />
                   <div class="card-body">
                     <h5 class="card-title">{{ hall.name }}</h5>
@@ -55,13 +55,26 @@
                     </div>
                   </div>
                 </div>
-              </Accordion.Body>
-            </Accordion.Item>
+              </div>
+            </transition>
+          </div>
 
-            <Accordion.Item eventKey="2">
-              <Accordion.Header>Thực Đơn</Accordion.Header>
-              <Accordion.Body class="body">
-                <div v-for="(menu, index) in menus" :key="index" class="menu-card" style="width: 18rem;">
+
+          <!-- MENU -->
+          <div class="accordion-item">
+            <div>
+              <h2 class="section-title">Thực Đơn</h2>
+
+            </div>
+            <button type="button" class="branch-toggle-button" :class="{ active: openSection === 'menu' }"
+              @click="toggleSection('menu')">
+              Thực Đơn
+            </button>
+
+            <transition name="accordion-slide">
+              <div v-if="openSection === 'menu'" class="accordion-body">
+                <div v-for="(menu, index) in menus" :key="index" class="menu-card"
+                  style="width: 18rem; margin-bottom: 16px; margin-right: 16px">
                   <img class="image-fixed-height" :src="menu.image" alt="Menu Image" />
                   <div class="card-body">
                     <h5 class="card-title">{{ menu.name }}</h5>
@@ -74,14 +87,26 @@
                     </div>
                   </div>
                 </div>
-              </Accordion.Body>
-            </Accordion.Item>
+              </div>
+            </transition>
+          </div>
 
+          <!-- Dịch vụ -->
 
-            <Accordion.Item eventKey="3">
-              <Accordion.Header>Dịch Vụ</Accordion.Header>
-              <Accordion.Body class="body">
-                <div v-for="(service, index) in services" :key="index" class="menu-card" style="width: 18rem;">
+          <div class="accordion-item">
+
+            <div>
+              <h2 class="section-title">Dịch Vụ</h2>
+            </div>
+            <button type="button" class="branch-toggle-button" :class="{ active: openSection === 'service' }"
+              @click="toggleSection('service')">
+              Dịch Vụ
+            </button>
+
+            <transition name="accordion-slide">
+              <div v-if="openSection === 'service'" class="accordion-body">
+                <div v-for="(service, index) in services" :key="index" class="menu-card"
+                  style="width: 18rem; margin-bottom: 16px; margin-right: 16px">
                   <img class="image-fixed-height" :src="service.image" alt="Service Image" />
                   <div class="card-body">
                     <h5 class="card-title">{{ service.name }}</h5>
@@ -94,50 +119,61 @@
                     </div>
                   </div>
                 </div>
-              </Accordion.Body>
-            </Accordion.Item>
+              </div>
+            </transition>
+          </div>
 
-            <Accordion.Item eventKey="4">
-              <Accordion.Header>Thông Tin Người Đặt</Accordion.Header>
-              <Accordion.Body class="body">
-                <div class="form-group">
-                  <label for="fullName">Họ và Tên:</label>
-                  <input id="fullName" type="text" class="form-control" v-model="fullName"
-                    placeholder="Nhập họ và tên" />
-                </div>
-                <div class="form-group">
-                  <label for="phoneNumber">Số Điện Thoại:</label>
-                  <input id="phoneNumber" type="tel" class="form-control" v-model="phoneNumber"
-                    placeholder="Nhập số điện thoại" />
-                </div>
-                <div class="form-group">
-                  <label for="note">Ghi Chú:</label>
-                  <textarea id="note" class="form-control" v-model="note"
-                    placeholder="Nhập ghi chú (nếu có)"></textarea>
-                </div>
 
-              </Accordion.Body>
-            </Accordion.Item>
 
-            <Accordion.Item eventKey="5">
-              <Accordion.Header>Chọn Ngày và Buổi Tổ Chức</Accordion.Header>
-              <Accordion.Body class="body">
-                <div class="form-group">
-                  <label for="selectedDate">Ngày Tổ Chức:</label>
-                  <input id="selectedDate" type="date" class="form-control" v-model="selectedDate"
-                    placeholder="Chọn ngày tổ chức" />
-                </div>
-                <div class="form-group mt-3">
-                  <label for="selectedTimeSlot">Buổi Tổ Chức:</label>
-                  <select id="selectedTimeSlot" class="form-control" v-model="selectedTimeSlot">
-                    <option value="" disabled>Chọn buổi tổ chức</option>
-                    <option v-for="slot in timeSlots" :key="slot" :value="slot">
-                      {{ slot }}
-                    </option>
-                  </select>
-                </div>
-              </Accordion.Body>
-            </Accordion.Item>
+
+          <!-- Thông tin người đặt -->
+          <div class="section-block">
+            <h2 class="section-title">Thông tin người đặt</h2>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="fullName">Họ và tên:</label>
+                <input id="fullName" type="text" class="form-control" v-model="fullName" placeholder="nguyen van a" />
+              </div>
+
+              <div class="form-group">
+                <label for="phoneNumber">Số điện thoại:</label>
+                <input id="phoneNumber" type="tel" class="form-control" v-model="phoneNumber"
+                  placeholder="0325478964" />
+              </div>
+
+              <div class="form-group full-width">
+                <label for="note">Ghi chú cho nhà hàng:</label>
+                <textarea id="note" class="form-control" v-model="note" placeholder="Ghi chú nếu có"
+                  rows="3"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="selectedDate">Ngày đến tham dự:</label>
+                <input id="selectedDate" type="date" class="form-control" v-model="selectedDate" />
+              </div>
+
+              <div class="form-group">
+                <label for="selectedTimeSlot">Chọn ca:</label>
+                <select id="selectedTimeSlot" class="form-control" v-model="selectedTimeSlot">
+                  <option value="">-- Chọn ca --</option>
+                  <option v-for="slot in timeSlots" :key="slot" :value="slot">
+                    {{ slot }}
+                  </option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+
+          <Accordion>
+
+
+
+
+
+
+
 
 
             <Accordion.Item eventKey="6">
@@ -160,7 +196,7 @@
                 </div>
                 <p v-if="discount > 0" class="mt-3">
                   Đã áp dụng mã giảm giá: <strong>{{ selectedPromoCode.codeName }}</strong> - Giảm <strong>{{ discount
-                    }}%</strong>
+                  }}%</strong>
                 </p>
               </Accordion.Body>
             </Accordion.Item>
@@ -285,7 +321,7 @@
         </form>
       </div>
     </div>
-    
+
   </div>
 </template>
 
@@ -302,12 +338,11 @@ import { watch } from "vue";
 
 import Modal from '@/components/common/Modal.vue'; // Đường dẫn tùy thuộc vào vị trí file Modal
 // State
-const isBranchOpen = ref(false);
+
+const isBranchOpen = ref(false)
 
 
-
-
-
+const openSection = ref(null)
 
 
 const activeKey = ref(null);
@@ -614,25 +649,25 @@ const confirmOrder = async () => {
 
 
 
-const orderData = {
-  UserId: userId,
-  BranchId: selectedBranchId.value,
-  HallId: selectedHallId.value,
-  OrderMenus: selectedMenus.value.map(menuId => ({ MenuID: menuId, Quantity: 1 })),
-  OrderServices: selectedServices.value.map(serviceId => ({ ServiceID: serviceId, Quantity: 1 })),
-  AttendanceDate: selectedDate.value,
-  TimeHall: selectedTimeSlot.value,
-  FullName: fullName.value,
-  PhoneNumber: phoneNumber.value,
-  Note: note.value || "",
-  InvoiceCodeRequest: selectedPromoCode.value
-    ? [{ CodeId: selectedPromoCode.value.codeId }]
-    : [],
-  Total: total,
-  TotalBeforeDiscount: totalBeforeDiscount,
-  // KHÔNG truyền DepositPayment và OrderStatus ở đây!
-  PaymentWallet: false
-};
+  const orderData = {
+    UserId: userId,
+    BranchId: selectedBranchId.value,
+    HallId: selectedHallId.value,
+    OrderMenus: selectedMenus.value.map(menuId => ({ MenuID: menuId, Quantity: 1 })),
+    OrderServices: selectedServices.value.map(serviceId => ({ ServiceID: serviceId, Quantity: 1 })),
+    AttendanceDate: selectedDate.value,
+    TimeHall: selectedTimeSlot.value,
+    FullName: fullName.value,
+    PhoneNumber: phoneNumber.value,
+    Note: note.value || "",
+    InvoiceCodeRequest: selectedPromoCode.value
+      ? [{ CodeId: selectedPromoCode.value.codeId }]
+      : [],
+    Total: total,
+    TotalBeforeDiscount: totalBeforeDiscount,
+    // KHÔNG truyền DepositPayment và OrderStatus ở đây!
+    PaymentWallet: false
+  };
 
   try {
     const response = await axios.post("https://localhost:7296/api/invoice", orderData)
@@ -782,6 +817,10 @@ const handleCheckOrder = async () => {
   }
 };
 
+const toggleSection = (sectionName) => {
+  openSection.value = openSection.value === sectionName ? null : sectionName
+}
+
 
 // Lifecycle hook
 onMounted(async () => {
@@ -812,4 +851,23 @@ onMounted(async () => {
 
 </script>
 
-<style scoped></style>
+<style scoped>
+.section-title {
+  font-size: 42px;
+  font-weight: 700;
+  text-align: center;
+  color: #2c3e50;
+  margin-bottom: 30px;
+  position: relative;
+}
+
+.section-title::after {
+  content: "";
+  display: block;
+  width: 100px;
+  height: 4px;
+  background: linear-gradient(90deg, #fe8e5c 0%, #f5576c 100%);
+  margin: 15px auto 0 auto;
+  border-radius: 2px;
+}
+</style>
