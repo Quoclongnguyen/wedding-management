@@ -68,7 +68,7 @@
               <button
                 @click="handleLogout"
                 class="nav-link text-black me-3 fw-bold mt-1 btn btn-link"
-                style="width: 100px; margin-left: -6px"
+                style="width: 100px; margin-left: 8px"
               >
                 Đăng Xuất
               </button>

@@ -55,13 +55,11 @@
         </div>
       </div>
     </div>
-    
-    <!-- Gọi component khác 
     <Branch />
     <Hall />
     <Menu />
     <Service />
-    -->
+  
   </div>
 </template>
 
@@ -69,7 +67,10 @@
 import { RouterLink } from 'vue-router'
 import Button from '@/components/Button/button.vue'
 import "./Home.scss"
-
+import Branch from '@/components/Branch/Branch.vue'
+import Hall from '@/components/Hall/Hall.vue'
+import Menu from '@/components/Menu/Menu.vue'
+import Service from '@/components/Service/Service.vue'
 
 // Đường dẫn ảnh, nhớ sửa lại nếu khác
 import imgSrc from '@/assets/assets/img_1.png'
