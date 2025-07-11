@@ -1,0 +1,117 @@
+{
+  "Files": [
+    {
+      "Id": "D:\\workspace\\vue\\wedding-vue\\wedding-management-main\\wedding-management-be\\CodeFirst\\CodeFirst\\obj\\Debug\\net6.0\\scopedcss\\projectbundle\\CodeFirst.bundle.scp.css",
+      "PackagePath": "staticwebassets\\CodeFirst.2zqfbousq1.bundle.scp.css"
+    },
+    {
+      "Id": "D:\\workspace\\vue\\wedding-vue\\wedding-management-main\\wedding-management-be\\CodeFirst\\CodeFirst\\wwwroot\\admin_assets\\bundles\\libscripts.bundle.js",
+      "PackagePath": "staticwebassets\\admin_assets\\bundles\\libscripts.bundle.js"
+    },
+    {
+      "Id": "D:\\workspace\\vue\\wedding-vue\\wedding-management-main\\wedding-management-be\\CodeFirst\\CodeFirst\\wwwroot\\admin_assets\\css\\login.css",
+      "PackagePath": "staticwebassets\\admin_assets\\css\\login.css"
+    },
+    {
+      "Id": "D:\\workspace\\vue\\wedding-vue\\wedding-management-main\\wedding-management-be\\CodeFirst\\CodeFirst\\wwwroot\\admin_assets\\css\\my-task.style.min.css",
+      "PackagePath": "staticwebassets\\admin_assets\\css\\my-task.style.min.css"
+    },
+    {
+      "Id": "D:\\workspace\\vue\\wedding-vue\\wedding-management-main\\wedding-management-be\\CodeFirst\\CodeFirst\\wwwroot\\admin_assets\\css\\mystyle.css",
+      "PackagePath": "staticwebassets\\admin_assets\\css\\mystyle.css"
+    },
+    {
+      "Id": "D:\\workspace\\vue\\wedding-vue\\wedding-management-main\\wedding-management-be\\CodeFirst\\CodeFirst\\wwwroot\\admin_assets\\images\\cf.gif",
+      "PackagePath": "staticwebassets\\admin_assets\\images\\cf.gif"
+    },
+    {
+      "Id": "D:\\workspace\\vue\\wedding-vue\\wedding-management-main\\wedding-management-be\\CodeFirst\\CodeFirst\\wwwroot\\admin_assets\\template.js",
+      "PackagePath": "staticwebassets\\admin_assets\\template.js"
+    },
+    {
+      "Id": "D:\\workspace\\vue\\wedding-vue\\wedding-management-main\\wedding-management-be\\CodeFirst\\CodeFirst\\wwwroot\\assets_argon\\css\\argon-dashboard.css",
+      "PackagePath": "staticwebassets\\assets_argon\\css\\argon-dashboard.css"
+    },
+    {
+      "Id": "D:\\workspace\\vue\\wedding-vue\\wedding-management-main\\wedding-management-be\\CodeFirst\\CodeFirst\\wwwroot\\assets_argon\\css\\argon-dashboard.css.map",
+      "PackagePath": "staticwebassets\\assets_argon\\css\\argon-dashboard.css.map"
+    },
+    {
+      "Id": "D:\\workspace\\vue\\wedding-vue\\wedding-management-main\\wedding-management-be\\CodeFirst\\CodeFirst\\wwwroot\\assets_argon\\css\\argon-dashboard.min.css",
+      "PackagePath": "staticwebassets\\assets_argon\\css\\argon-dashboard.min.css"
+    },
+    {
+      "Id": "D:\\workspace\\vue\\wedding-vue\\wedding-management-main\\wedding-management-be\\CodeFirst\\CodeFirst\\wwwroot\\css\\home.css",
+      "PackagePath": "staticwebassets\\css\\home.css"
+    },
+    {
+      "Id": "D:\\workspace\\vue\\wedding-vue\\wedding-management-main\\wedding-management-be\\CodeFirst\\CodeFirst\\wwwroot\\css\\mydesign.css",
+      "PackagePath": "staticwebassets\\css\\mydesign.css"
+    },
+    {
+      "Id": "D:\\workspace\\vue\\wedding-vue\\wedding-management-main\\wedding-management-be\\CodeFirst\\CodeFirst\\wwwroot\\css\\stylesortable.css",
+      "PackagePath": "staticwebassets\\css\\stylesortable.css"
+    },
+    {
+      "Id": "D:\\workspace\\vue\\wedding-vue\\wedding-management-main\\wedding-management-be\\CodeFirst\\CodeFirst\\wwwroot\\css\\stylethongke.css",
+      "PackagePath": "staticwebassets\\css\\stylethongke.css"
+    },
+    {
+      "Id": "D:\\workspace\\vue\\wedding-vue\\wedding-management-main\\wedding-management-be\\CodeFirst\\CodeFirst\\wwwroot\\favicon.ico",
+      "PackagePath": "staticwebassets\\favicon.ico"
+    },
+    {
+      "Id": "D:\\workspace\\vue\\wedding-vue\\wedding-management-main\\wedding-management-be\\CodeFirst\\CodeFirst\\wwwroot\\images\\favicon.png",
+      "PackagePath": "staticwebassets\\images\\favicon.png"
+    },
+    {
+      "Id": "D:\\workspace\\vue\\wedding-vue\\wedding-management-main\\wedding-management-be\\CodeFirst\\CodeFirst\\wwwroot\\js\\blazorjs.js",
+      "PackagePath": "staticwebassets\\js\\blazorjs.js"
+    },
+    {
+      "Id": "D:\\workspace\\vue\\wedding-vue\\wedding-management-main\\wedding-management-be\\CodeFirst\\CodeFirst\\wwwroot\\js\\chat.js",
+      "PackagePath": "staticwebassets\\js\\chat.js"
+    },
+    {
+      "Id": "D:\\workspace\\vue\\wedding-vue\\wedding-management-main\\wedding-management-be\\CodeFirst\\CodeFirst\\wwwroot\\js\\notification.js",
+      "PackagePath": "staticwebassets\\js\\notification.js"
+    },
+    {
+      "Id": "D:\\workspace\\vue\\wedding-vue\\wedding-management-main\\wedding-management-be\\CodeFirst\\CodeFirst\\wwwroot\\js\\qrcode.js",
+      "PackagePath": "staticwebassets\\js\\qrcode.js"
+    },
+    {
+      "Id": "D:\\workspace\\vue\\wedding-vue\\wedding-management-main\\wedding-management-be\\CodeFirst\\CodeFirst\\wwwroot\\js\\qrcode.min.js",
+      "PackagePath": "staticwebassets\\js\\qrcode.min.js"
+    },
+    {
+      "Id": "D:\\workspace\\vue\\wedding-vue\\wedding-management-main\\wedding-management-be\\CodeFirst\\CodeFirst\\wwwroot\\js\\site.js",
+      "PackagePath": "staticwebassets\\js\\site.js"
+    },
+    {
+      "Id": "D:\\workspace\\vue\\wedding-vue\\wedding-management-main\\wedding-management-be\\CodeFirst\\CodeFirst\\wwwroot\\js\\tasktodo.js",
+      "PackagePath": "staticwebassets\\js\\tasktodo.js"
+    },
+    {
+      "Id": "obj\\Debug\\net6.0\\staticwebassets\\msbuild.CodeFirst.Microsoft.AspNetCore.StaticWebAssetEndpoints.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssetEndpoints.props"
+    },
+    {
+      "Id": "obj\\Debug\\net6.0\\staticwebassets\\msbuild.CodeFirst.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net6.0\\staticwebassets\\msbuild.build.CodeFirst.props",
+      "PackagePath": "build\\CodeFirst.props"
+    },
+    {
+      "Id": "obj\\Debug\\net6.0\\staticwebassets\\msbuild.buildMultiTargeting.CodeFirst.props",
+      "PackagePath": "buildMultiTargeting\\CodeFirst.props"
+    },
+    {
+      "Id": "obj\\Debug\\net6.0\\staticwebassets\\msbuild.buildTransitive.CodeFirst.props",
+      "PackagePath": "buildTransitive\\CodeFirst.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

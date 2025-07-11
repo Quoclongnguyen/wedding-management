@@ -1,0 +1,12 @@
+[
+  {
+    "ContainingType": "CodeFirst.Controllers.ManageUserController",
+    "Method": "GetEmployees",
+    "RelativePath": "api/ManageUser",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  }
+]
