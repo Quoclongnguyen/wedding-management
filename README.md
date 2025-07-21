@@ -1,6 +1,8 @@
 Có 3 nhánh Chính 
 -maim(amin)
+
 -Be(backend)
+
 -fe-user(web user)
 
 
@@ -23,14 +25,19 @@ Có 3 nhánh Chính
 <img width="1903" height="944" alt="image" src="https://github.com/user-attachments/assets/aaf412e2-214f-450e-bd7e-8533d2b3688c" />
 
 -Quản lý menu dịch vụ
+<img width="1905" height="1011" alt="image" src="https://github.com/user-attachments/assets/27f1ca05-8f7a-469a-9d4f-0e959cce375d" />
+
 
 -Quản lý dịch vụ 
+<img width="1906" height="887" alt="image" src="https://github.com/user-attachments/assets/a4499214-8ab6-4788-bd07-64076c4f618a" />
+
 
 - Quản lý hóa đơn
-![Uploading image.png…]()
+<img width="1860" height="937" alt="image" src="https://github.com/user-attachments/assets/d3b1bb91-e970-4257-bb6a-77bba372b451" />
+
 
 -Quản lý đánh giá
-![Uploading image.png…]()
+<img width="1894" height="959" alt="image" src="https://github.com/user-attachments/assets/4e6d4aa1-060d-42d0-9c0d-5c30ebf9721b" />
 
 
 
