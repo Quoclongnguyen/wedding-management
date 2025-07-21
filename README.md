@@ -1,4 +1,4 @@
-<img width="1897" height="944" alt="image" src="https://github.com/user-attachments/assets/4e82981b-e350-452d-be8a-e051247710af" />Có 3 nhánh Chính 
+Có 3 nhánh Chính 
 -maim(amin)
 -Be(backend)
 -fe-user(web user)
