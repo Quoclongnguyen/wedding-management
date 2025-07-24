@@ -1,5 +1,5 @@
 Có 3 nhánh Chính 
--maim(amin)
+-main(amin)
 
 -Be(backend)
 
